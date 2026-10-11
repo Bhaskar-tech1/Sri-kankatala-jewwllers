@@ -98,9 +98,9 @@ export default function HeroSlider() {
         speed={800}
         loop
         autoplay={{
-          delay: 2000,
+          delay: 5000,
           disableOnInteraction: false,
-          pauseOnMouseEnter: false,
+          pauseOnMouseEnter: true,
         }}
         pagination={{
           clickable: true,

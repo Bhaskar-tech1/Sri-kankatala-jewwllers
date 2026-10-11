@@ -1,0 +1,520 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useRouter, useParams } from 'next/navigation';
+import Link from 'next/link';
+import Image from 'next/image';
+import {
+  ArrowLeft, CheckCircle2, AlertCircle,
+  ImagePlus, Loader2
+} from 'lucide-react';
+
+const CATEGORIES = [
+  'Necklaces',
+  'Chokers',
+  'Harams',
+  'Kasumala / Temple Jewellery',
+  'Earrings',
+  'Jhumkas',
+  'Chandbalis',
+  'Studs',
+  'Bangles',
+  'Kadas',
+  'Bracelets',
+  'Rings',
+  'Pendants',
+  'Mangalsutras / Nallapusalu',
+  'Anklets (Payal / Pattilu)',
+  'Nose Pins / Mukkupudaka',
+  'Maang Tikka / Papidi Billa',
+  'Vaddanam (Waist Belts)',
+  'Vanki (Armlets / Bajuband)',
+  'Chains',
+  'Coins (Gold & Silver)',
+  'Silver Articles & Pooja Items',
+  'Idols & Murthis',
+  'Watches',
+  'Other',
+];
+
+export default function EditProductPage() {
+  const router = useRouter();
+  const { id } = useParams();
+
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState(false);
+
+  // Form State
+  const [name, setName] = useState('');
+  const [description, setDescription] = useState('');
+  const [material, setMaterial] = useState('gold');
+  const [audience, setAudience] = useState('women');
+  const [category, setCategory] = useState('Necklaces');
+  const [customCategory, setCustomCategory] = useState('');
+  const [purity, setPurity] = useState('22K');
+  const [weightGrams, setWeightGrams] = useState('');
+  const [price, setPrice] = useState('');
+  const [stockStatus, setStockStatus] = useState('in_stock');
+  const [featured, setFeatured] = useState(false);
+
+  // Image Upload State
+  const [imagePreview, setImagePreview] = useState('');
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [cloudinaryUrl, setCloudinaryUrl] = useState('');
+
+  // 1. Fetch Existing Product Data
+  useEffect(() => {
+    async function loadProduct() {
+      try {
+        const res = await fetch(`/api/admin/products/${id}`);
+        const data = await res.json();
+        if (!res.ok || !data.product) {
+          throw new Error(data.error || 'Product not found');
+        }
+
+        const p = data.product;
+        setName(p.name || '');
+        setDescription(p.description || '');
+        setMaterial(p.material || 'gold');
+        setAudience(p.audience || 'women');
+
+        // Check if category is in list, else set to Other + custom
+        if (CATEGORIES.includes(p.category)) {
+          setCategory(p.category);
+        } else {
+          setCategory('Other');
+          setCustomCategory(p.category || '');
+        }
+
+        setPurity(p.purity || '22K');
+        setWeightGrams(p.weightGrams?.toString() || '');
+        setPrice(p.price?.toString() || '');
+        setStockStatus(p.stockStatus || 'in_stock');
+        setFeatured(Boolean(p.featured));
+
+        const existingImg = p.images?.[0] || '';
+        setCloudinaryUrl(existingImg);
+        setImagePreview(existingImg);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    if (id) {
+      loadProduct();
+    }
+  }, [id]);
+
+  // Automatic upload to Cloudinary upon selecting a new image
+  const handleFileChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setImagePreview(URL.createObjectURL(file));
+    setUploadingImage(true);
+    setError('');
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const res = await fetch('/api/admin/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Image upload failed');
+      }
+
+      setCloudinaryUrl(data.url);
+    } catch (err) {
+      console.error('Image upload failed:', err);
+      setError(`Image Upload Error: ${err.message}`);
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
+  // Handle Form Submit
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+
+    if (uploadingImage) {
+      setError('Please wait for the image upload to complete.');
+      return;
+    }
+
+    if (!cloudinaryUrl) {
+      setError('Please provide a product image.');
+      return;
+    }
+
+    setSubmitting(true);
+
+    try {
+      const finalCategory = category === 'Other' ? (customCategory.trim() || 'Other') : category;
+
+      const payload = {
+        name: name.trim(),
+        description: description.trim(),
+        material,
+        audience,
+        category: finalCategory,
+        purity,
+        weightGrams: parseFloat(weightGrams) || 0,
+        price: parseFloat(price) || 0,
+        stockStatus,
+        featured,
+        images: [cloudinaryUrl],
+      };
+
+      const res = await fetch(`/api/admin/products/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to update product');
+      }
+
+      setSuccess(true);
+      setTimeout(() => {
+        router.push('/admin');
+      }, 1200);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <Loader2 className="w-8 h-8 text-[#C8102E] animate-spin" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-[#F8F9FA] py-8 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-3xl mx-auto">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+          {/* Header */}
+          <div className="p-6 sm:p-8 border-b border-gray-100 flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <Link
+                href="/admin"
+                className="w-10 h-10 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 flex items-center justify-center transition-colors"
+                title="Back to Dashboard"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </Link>
+              <div>
+                <h1 className="text-xl sm:text-2xl font-serif font-bold text-gray-900">
+                  Edit Product
+                </h1>
+                <p className="text-xs sm:text-sm text-gray-500 mt-0.5">
+                  Update product details and sync directly to Firestore
+                </p>
+              </div>
+            </div>
+
+            <div className="hidden sm:flex items-center gap-2.5">
+              <div
+                style={{ width: '38px', height: '38px', minWidth: '38px', minHeight: '38px' }}
+                className="rounded-full overflow-hidden flex items-center justify-center bg-white shadow-xs border border-gray-100 flex-shrink-0"
+              >
+                <img
+                  src="/SKJlogo.png"
+                  alt="SKJ Logo"
+                  style={{ width: '38px', height: '38px', maxWidth: '38px', maxHeight: '38px', objectFit: 'contain' }}
+                  className="block"
+                />
+              </div>
+              <span className="font-serif font-semibold text-gray-800 text-sm">
+                Sri Kankatala Jewellers
+              </span>
+            </div>
+          </div>
+
+          {/* Form */}
+          <form onSubmit={handleSubmit} className="p-6 sm:p-8 space-y-6">
+            {error && (
+              <div className="p-4 bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl flex items-start gap-3">
+                <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+                <span>{error}</span>
+              </div>
+            )}
+
+            {success && (
+              <div className="p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm rounded-xl flex items-center gap-3">
+                <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0" />
+                <span>Product updated successfully! Redirecting...</span>
+              </div>
+            )}
+
+            {/* Name */}
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-wider text-gray-700 mb-2">
+                Product Name *
+              </label>
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#8B0000] focus:bg-white transition-all"
+              />
+            </div>
+
+            {/* Material & Audience */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              <div>
+                <label className="block text-xs font-semibold uppercase tracking-wider text-gray-700 mb-2">
+                  Material *
+                </label>
+                <select
+                  value={material}
+                  onChange={(e) => setMaterial(e.target.value)}
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#8B0000] focus:bg-white transition-all"
+                >
+                  <option value="gold">Gold (Yellow / Antique / Temple)</option>
+                  <option value="silver">Silver (92.5 Sterling / Pure)</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold uppercase tracking-wider text-gray-700 mb-2">
+                  Audience / Section *
+                </label>
+                <select
+                  value={audience}
+                  onChange={(e) => setAudience(e.target.value)}
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#8B0000] focus:bg-white transition-all"
+                >
+                  <option value="women">Women</option>
+                  <option value="men">Men</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Category & Purity */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              <div>
+                <label className="block text-xs font-semibold uppercase tracking-wider text-gray-700 mb-2">
+                  Category *
+                </label>
+                <select
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#8B0000] focus:bg-white transition-all"
+                >
+                  {CATEGORIES.map((cat) => (
+                    <option key={cat} value={cat}>
+                      {cat}
+                    </option>
+                  ))}
+                </select>
+
+                {category === 'Other' && (
+                  <div className="mt-2.5">
+                    <input
+                      type="text"
+                      value={customCategory}
+                      onChange={(e) => setCustomCategory(e.target.value)}
+                      placeholder="Type custom category name..."
+                      required
+                      className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-xl text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#8B0000]"
+                    />
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold uppercase tracking-wider text-gray-700 mb-2">
+                  Purity / Carats *
+                </label>
+                {material === 'gold' ? (
+                  <select
+                    value={purity}
+                    onChange={(e) => setPurity(e.target.value)}
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#8B0000] focus:bg-white transition-all"
+                  >
+                    <option value="22K">22K (916 BIS Hallmark)</option>
+                    <option value="24K">24K (Pure Gold)</option>
+                    <option value="18K">18K (Diamond / Designer)</option>
+                  </select>
+                ) : (
+                  <select
+                    value={purity}
+                    onChange={(e) => setPurity(e.target.value)}
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#8B0000] focus:bg-white transition-all"
+                  >
+                    <option value="92.5 Sterling">92.5% Sterling Silver</option>
+                    <option value="99.9 Pure Silver">99.9% Pure Silver (Pooja Articles)</option>
+                    <option value="Silver Articles">Traditional Silver</option>
+                  </select>
+                )}
+              </div>
+            </div>
+
+            {/* Weight & Price */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              <div>
+                <label className="block text-xs font-semibold uppercase tracking-wider text-gray-700 mb-2">
+                  Weight (in Grams) *
+                </label>
+                <div className="relative">
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={weightGrams}
+                    onChange={(e) => setWeightGrams(e.target.value)}
+                    required
+                    className="w-full pl-4 pr-10 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#8B0000] focus:bg-white transition-all"
+                  />
+                  <span className="absolute right-3.5 top-3.5 text-xs font-semibold text-gray-400 pointer-events-none">
+                    grams
+                  </span>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold uppercase tracking-wider text-gray-700 mb-2">
+                  Price (₹) *
+                </label>
+                <div className="relative">
+                  <span className="absolute left-3.5 top-3.5 text-sm font-semibold text-gray-400 pointer-events-none">
+                    ₹
+                  </span>
+                  <input
+                    type="number"
+                    min="0"
+                    value={price}
+                    onChange={(e) => setPrice(e.target.value)}
+                    required
+                    className="w-full pl-8 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#8B0000] focus:bg-white transition-all"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Description */}
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-wider text-gray-700 mb-2">
+                Description *
+              </label>
+              <textarea
+                rows={4}
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                required
+                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#8B0000] focus:bg-white transition-all"
+              />
+            </div>
+
+            {/* Cloudinary Image */}
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-wider text-gray-700 mb-2">
+                Product Image *
+              </label>
+
+              <div className="border-2 border-dashed border-gray-200 rounded-2xl p-6 bg-gray-50/50 flex flex-col items-center text-center">
+                {imagePreview && (
+                  <div className="relative w-40 h-40 rounded-xl overflow-hidden shadow-md border border-gray-200 mb-3 bg-white">
+                    <Image
+                      src={imagePreview}
+                      alt="Preview"
+                      fill
+                      className="object-cover"
+                    />
+                    {uploadingImage && (
+                      <div className="absolute inset-0 bg-black/50 backdrop-blur-xs flex flex-col items-center justify-center text-white text-xs gap-1.5 p-2">
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                        <span>Uploading to Cloudinary...</span>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {uploadingImage ? (
+                  <span className="inline-flex items-center gap-1.5 text-xs text-amber-600 font-medium bg-amber-50 px-3 py-1 rounded-full border border-amber-200">
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" /> Uploading directly to Cloudinary...
+                  </span>
+                ) : cloudinaryUrl ? (
+                  <div className="flex flex-col items-center gap-1.5">
+                    <span className="inline-flex items-center gap-1.5 text-xs text-emerald-600 font-medium bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
+                      <CheckCircle2 className="w-3.5 h-3.5" /> Uploaded to Cloudinary
+                    </span>
+                    <label className="text-xs text-gray-500 hover:text-gray-900 underline cursor-pointer mt-1">
+                      Choose different photo
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleFileChange}
+                        className="hidden"
+                      />
+                    </label>
+                  </div>
+                ) : null}
+              </div>
+            </div>
+
+            {/* Featured Collection Toggle */}
+            <div className="pt-2">
+              <div className="p-4 bg-gray-50 border border-gray-200 rounded-xl flex items-center justify-between">
+                <div>
+                  <span className="text-sm font-semibold text-gray-900 block">Featured Collection</span>
+                  <span className="text-xs text-gray-500">Show on homepage showcase</span>
+                </div>
+                <input
+                  type="checkbox"
+                  checked={featured}
+                  onChange={(e) => setFeatured(e.target.checked)}
+                  className="w-5 h-5 text-[#8B0000] accent-[#8B0000] rounded cursor-pointer"
+                />
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="pt-4 border-t border-gray-100 flex items-center justify-end gap-4">
+              <Link
+                href="/admin"
+                className="px-5 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
+              >
+                Cancel
+              </Link>
+
+              <button
+                type="submit"
+                disabled={submitting || uploadingImage}
+                className="px-7 py-3 bg-[#C8102E] hover:bg-[#A00D24] text-white text-sm font-semibold rounded-xl shadow-lg shadow-[#C8102E]/20 disabled:opacity-60 transition-all flex items-center gap-2 cursor-pointer"
+              >
+                {submitting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" /> Saving Changes...
+                  </>
+                ) : (
+                  <>
+                    <span>Update Product</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
+}

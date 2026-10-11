@@ -95,6 +95,11 @@ export default function Navbar() {
   const isParentActive = (children) =>
     children?.some((c) => pathname === c.href);
 
+  // Hide storefront navbar on admin pages
+  if (pathname?.startsWith('/admin')) {
+    return null;
+  }
+
   return (
     <>
       <header

@@ -1,5 +1,8 @@
+'use client';
+
 import Link from 'next/link';
 import Image from 'next/image';
+import { usePathname } from 'next/navigation';
 import siteConfig from '@/lib/config';
 
 const footerCollections = [
@@ -26,7 +29,12 @@ const footerLinks = [
 ];
 
 export default function Footer() {
+  const pathname = usePathname();
   const currentYear = new Date().getFullYear();
+
+  if (pathname?.startsWith('/admin')) {
+    return null;
+  }
 
   return (
     <footer className="bg-skj-deep-olive text-white/90" role="contentinfo">

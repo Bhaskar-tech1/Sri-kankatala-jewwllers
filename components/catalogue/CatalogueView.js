@@ -39,21 +39,38 @@ export default function CatalogueView({ material, audience }) {
   const [weightRange, setWeightRange] = useState({ min: '', max: '' });
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
-  // Get all products for this route
-  const allProducts = useMemo(
+  // Initial static fallback products for instant rendering
+  const staticProducts = useMemo(
     () => getProductsByRoute(material, audience),
     [material, audience]
   );
 
-  const categories = useMemo(
-    () => getCategories(material, audience),
-    [material, audience]
-  );
+  const [allProducts, setAllProducts] = useState(staticProducts);
 
-  const purityOptions = useMemo(
-    () => getPurityOptions(material, audience),
-    [material, audience]
-  );
+  // Sync with Firestore dynamic catalogue
+  useEffect(() => {
+    async function fetchDynamicProducts() {
+      try {
+        const res = await fetch(`/api/products?material=${material}&audience=${audience}`);
+        const data = await res.json();
+        if (data.products && Array.isArray(data.products)) {
+          setAllProducts(data.products);
+        }
+      } catch (err) {
+        console.warn('Dynamic fetch fallback active:', err);
+      }
+    }
+    fetchDynamicProducts();
+  }, [material, audience]);
+
+  const categories = useMemo(() => {
+    const cats = [...new Set(allProducts.map((p) => p.category))];
+    return cats.sort();
+  }, [allProducts]);
+
+  const purityOptions = useMemo(() => {
+    return [...new Set(allProducts.map((p) => p.purity))].sort();
+  }, [allProducts]);
 
   // Apply filters and sorting
   const filteredProducts = useMemo(() => {
@@ -417,22 +434,26 @@ export default function CatalogueView({ material, audience }) {
               </div>
             ) : (
               /* Empty state */
-              <div className="text-center py-20">
-                <div className="w-16 h-16 mx-auto mb-4 bg-skj-ivory flex items-center justify-center">
+              <div className="text-center py-20 px-4">
+                <div className="w-16 h-16 mx-auto mb-4 bg-skj-ivory flex items-center justify-center rounded-2xl border border-skj-border/60">
                   <Search size={24} className="text-skj-muted" />
                 </div>
                 <h3
                   className="text-lg font-semibold text-skj-charcoal mb-2"
                   style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
                 >
-                  No products found
+                  {allProducts.length === 0 ? 'Collection Coming Soon' : 'No products found'}
                 </h3>
-                <p className="text-sm text-skj-muted mb-4">
-                  Try adjusting your filters or search query.
+                <p className="text-sm text-skj-muted mb-4 max-w-sm mx-auto">
+                  {allProducts.length === 0
+                    ? 'Our handcrafted pieces will appear here as soon as they are added to inventory.'
+                    : 'Try adjusting your filters or search query to find what you are looking for.'}
                 </p>
-                <button onClick={clearAllFilters} className="btn-secondary text-sm">
-                  Clear All Filters
-                </button>
+                {allProducts.length > 0 && (
+                  <button onClick={clearAllFilters} className="btn-secondary text-sm">
+                    Clear All Filters
+                  </button>
+                )}
               </div>
             )}
           </div>

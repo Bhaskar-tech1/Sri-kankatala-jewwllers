@@ -1,11 +1,34 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { getFeaturedProducts } from '@/lib/api';
 import ProductCard from '@/components/product/ProductCard';
 
 export default function FeaturedProducts() {
-  const products = getFeaturedProducts(8);
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadFeatured() {
+      try {
+        const res = await fetch('/api/products');
+        const data = await res.json();
+        if (data.products && Array.isArray(data.products)) {
+          const featured = data.products.filter((p) => p.featured && p.stockStatus === 'in_stock');
+          setProducts(featured.slice(0, 8));
+        }
+      } catch (err) {
+        console.warn('Featured fetch error:', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadFeatured();
+  }, []);
+
+  if (!loading && products.length === 0) {
+    return null;
+  }
 
   return (
     <section className="section-spacing bg-skj-ivory" aria-labelledby="featured-title">

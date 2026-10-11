@@ -2,6 +2,8 @@ import { getAllProducts, getProductBySlug } from '@/lib/api';
 import ProductDetailClient from '@/components/product/ProductDetailClient';
 import { notFound } from 'next/navigation';
 
+export const dynamic = 'force-dynamic';
+
 // Generate static params for all products
 export async function generateStaticParams() {
   const products = getAllProducts();
@@ -13,7 +15,7 @@ export async function generateStaticParams() {
 // Dynamic metadata for each product
 export async function generateMetadata({ params }) {
   const { slug } = await params;
-  const product = getProductBySlug(slug);
+  const product = await getProductBySlug(slug);
   if (!product) {
     return { title: 'Product Not Found' };
   }
@@ -31,7 +33,7 @@ export async function generateMetadata({ params }) {
 
 export default async function ProductPage({ params }) {
   const { slug } = await params;
-  const product = getProductBySlug(slug);
+  const product = await getProductBySlug(slug);
 
   if (!product) {
     notFound();

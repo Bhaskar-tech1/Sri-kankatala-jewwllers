@@ -55,9 +55,9 @@ export default function ProductDetailClient({ product }) {
       <div className="section-container py-8 lg:py-12">
         <div className="grid lg:grid-cols-2 gap-8 lg:gap-12">
           {/* Left: Product image */}
-          <div className="relative">
-            <div className="aspect-square bg-gradient-to-br from-skj-ivory to-skj-border/40 flex items-center justify-center sticky top-28 rounded-3xl overflow-hidden shadow-sm border border-skj-border/30">
-              {/* Product image */}
+            <div className="relative">
+              <div className="relative aspect-square bg-gradient-to-br from-skj-ivory to-skj-border/40 flex items-center justify-center sticky top-28 rounded-3xl overflow-hidden shadow-sm border border-skj-border/30">
+                {/* Product image */}
               {product.images && product.images[0] ? (
                 <Image
                   src={product.images[0]}
