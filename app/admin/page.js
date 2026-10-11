@@ -6,8 +6,8 @@ import Link from 'next/link';
 import Image from 'next/image';
 import {
   Plus, LogOut, Search, Edit3, Trash2, PackageCheck, PackageX,
-  Loader2, RefreshCw, Eye, Sparkles, Filter, X, ChevronDown,
-  Layers, Gem, Shield, ExternalLink
+  Loader2, RefreshCw, Sparkles, Filter, X, ChevronDown,
+  Layers, Gem, Shield
 } from 'lucide-react';
 import { formatPrice } from '@/lib/utils';
 
@@ -251,15 +251,6 @@ export default function AdminDashboardPage() {
           </div>
 
           <div className="flex items-center gap-2.5 sm:gap-3">
-            <Link
-              href="/"
-              target="_blank"
-              className="px-3 py-2 text-xs font-medium text-gray-600 hover:text-gray-900 bg-gray-50 hover:bg-gray-100 rounded-xl border border-gray-200/80 flex items-center gap-1.5 transition-colors"
-            >
-              <span>View Store</span>
-              <ExternalLink className="w-3.5 h-3.5" />
-            </Link>
-
             <Link
               href="/admin/add"
               className="px-4 py-2 bg-[#C8102E] hover:bg-[#A00D24] text-white text-xs sm:text-sm font-semibold rounded-xl shadow-md shadow-[#C8102E]/20 flex items-center gap-1.5 transition-all cursor-pointer"
