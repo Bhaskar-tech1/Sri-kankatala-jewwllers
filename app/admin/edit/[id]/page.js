@@ -6,7 +6,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import {
   ArrowLeft, CheckCircle2, AlertCircle,
-  ImagePlus, Loader2
+  ImagePlus, Loader2, Check
 } from 'lucide-react';
 
 const CATEGORIES = [
@@ -42,9 +42,9 @@ export default function EditProductPage() {
   const { id } = useParams();
 
   const [loading, setLoading] = useState(true);
-  const [submitting, setSubmitting] = useState(false);
+  // Submit State: 'idle' | 'submitting' | 'success'
+  const [submitStatus, setSubmitStatus] = useState('idle');
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState(false);
 
   // Form State
   const [name, setName] = useState('');
@@ -64,8 +64,9 @@ export default function EditProductPage() {
   const [uploadingImage, setUploadingImage] = useState(false);
   const [cloudinaryUrl, setCloudinaryUrl] = useState('');
 
-  // 1. Fetch Existing Product Data
+  // 1. Fetch Existing Product Data & Prefetch Dashboard
   useEffect(() => {
+    router.prefetch('/admin');
     async function loadProduct() {
       try {
         const res = await fetch(`/api/admin/products/${id}`);
@@ -144,6 +145,7 @@ export default function EditProductPage() {
   // Handle Form Submit
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (submitStatus !== 'idle') return;
     setError('');
 
     if (uploadingImage) {
@@ -156,7 +158,7 @@ export default function EditProductPage() {
       return;
     }
 
-    setSubmitting(true);
+    setSubmitStatus('submitting');
 
     try {
       const finalCategory = category === 'Other' ? (customCategory.trim() || 'Other') : category;
@@ -186,14 +188,14 @@ export default function EditProductPage() {
         throw new Error(data.error || 'Failed to update product');
       }
 
-      setSuccess(true);
+      setSubmitStatus('success');
+
       setTimeout(() => {
         router.push('/admin');
-      }, 1200);
+      }, 1500);
     } catch (err) {
       setError(err.message);
-    } finally {
-      setSubmitting(false);
+      setSubmitStatus('idle');
     }
   };
 
@@ -250,16 +252,9 @@ export default function EditProductPage() {
           {/* Form */}
           <form onSubmit={handleSubmit} className="p-6 sm:p-8 space-y-6">
             {error && (
-              <div className="p-4 bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl flex items-start gap-3">
+              <div className="p-4 bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl flex items-start gap-3 animate-modal-card">
                 <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
                 <span>{error}</span>
-              </div>
-            )}
-
-            {success && (
-              <div className="p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm rounded-xl flex items-center gap-3">
-                <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0" />
-                <span>Product updated successfully! Redirecting...</span>
               </div>
             )}
 
@@ -491,30 +486,67 @@ export default function EditProductPage() {
             <div className="pt-4 border-t border-gray-100 flex items-center justify-end gap-4">
               <Link
                 href="/admin"
-                className="px-5 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
+                className={`px-5 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors ${
+                  submitStatus !== 'idle' ? 'pointer-events-none opacity-40' : ''
+                }`}
               >
                 Cancel
               </Link>
 
               <button
                 type="submit"
-                disabled={submitting || uploadingImage}
-                className="px-7 py-3 bg-[#C8102E] hover:bg-[#A00D24] text-white text-sm font-semibold rounded-xl shadow-lg shadow-[#C8102E]/20 disabled:opacity-60 transition-all flex items-center gap-2 cursor-pointer"
+                disabled={submitStatus !== 'idle' || uploadingImage}
+                className={`min-w-[190px] h-[48px] px-7 py-3 text-white text-sm font-semibold rounded-xl shadow-lg transition-all duration-300 flex items-center justify-center gap-2.5 ${
+                  submitStatus === 'success'
+                    ? 'bg-emerald-600 shadow-emerald-600/30 scale-[1.02] cursor-default'
+                    : submitStatus === 'submitting'
+                    ? 'bg-[#B00E28] shadow-[#B00E28]/25 cursor-wait'
+                    : 'bg-[#C8102E] hover:bg-[#A00D24] active:scale-[0.98] shadow-[#C8102E]/25 cursor-pointer'
+                }`}
               >
-                {submitting ? (
+                {submitStatus === 'submitting' ? (
                   <>
-                    <Loader2 className="w-4 h-4 animate-spin" /> Saving Changes...
+                    <Loader2 className="w-4 h-4 animate-spin text-white/90" />
+                    <span>Saving Changes...</span>
+                  </>
+                ) : submitStatus === 'success' ? (
+                  <>
+                    <Check className="w-4 h-4 stroke-[2.5]" />
+                    <span>Updated!</span>
                   </>
                 ) : (
-                  <>
-                    <span>Update Product</span>
-                  </>
+                  <span>Update Product</span>
                 )}
               </button>
             </div>
           </form>
         </div>
       </div>
+
+      {/* Luxury Success Transition Modal Overlay */}
+      {submitStatus === 'success' && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm animate-modal-backdrop px-4">
+          <div className="bg-white rounded-2xl shadow-2xl border border-gray-100 p-8 max-w-sm w-full mx-auto text-center animate-modal-card">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600 shadow-sm">
+              <CheckCircle2 className="w-9 h-9 stroke-[2.2]" />
+            </div>
+            <h3 className="font-serif text-xl font-bold text-gray-900 mb-1.5">
+              Changes Saved!
+            </h3>
+            <p className="text-xs sm:text-sm text-gray-500 mb-6 px-1 line-clamp-2">
+              &ldquo;{name || 'Product'}&rdquo; has been updated successfully.
+            </p>
+
+            {/* Smooth Progress Indicator */}
+            <div className="w-full bg-gray-100 rounded-full h-1.5 overflow-hidden mb-2.5">
+              <div className="bg-[#C8102E] h-full rounded-full animate-modal-progress" />
+            </div>
+            <span className="text-[11px] font-medium text-gray-400">
+              Returning to dashboard...
+            </span>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
