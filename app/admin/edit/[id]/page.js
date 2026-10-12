@@ -66,7 +66,7 @@ export default function EditProductPage() {
   const [extraAmount, setExtraAmount] = useState('0');
   const [stockStatus, setStockStatus] = useState('in_stock');
   const [featured, setFeatured] = useState(false);
-  const [centralizedRates, setCentralizedRates] = useState(DEFAULT_RATES);
+  const [centralizedRates, setCentralizedRates] = useState(null);
 
   // Image Upload State
   const [imagePreview, setImagePreview] = useState('');
@@ -200,6 +200,13 @@ export default function EditProductPage() {
         `Please enter the making charge ${
           makingChargeType === 'percentage' ? 'percentage' : 'in milligrams per gram'
         }.`
+      );
+      return;
+    }
+
+    if (!currentRatePerGram || currentRatePerGram <= 0) {
+      setError(
+        `Centralized daily rate for ${purity} ${material} is not set. Please update rates via "Gold/Silver Prices" on the dashboard before updating.`
       );
       return;
     }
@@ -522,22 +529,36 @@ export default function EditProductPage() {
               <label className="block text-xs font-semibold uppercase tracking-wider text-gray-700 mb-2">
                 Auto-Calculated Total Price (Live)
               </label>
-              <div className="p-4 bg-amber-50/70 border border-amber-200/80 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div>
-                  <div className="text-xl sm:text-2xl font-bold text-gray-900 font-serif">
-                    {calculatedPrice > 0 ? formatPrice(calculatedPrice) : '₹0'}
+              {currentRatePerGram <= 0 ? (
+                <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl text-amber-900 text-xs flex items-center justify-between gap-3">
+                  <div>
+                    <span className="font-semibold block text-sm">Rate Not Configured</span>
+                    <span className="text-[11px] text-amber-800">
+                      No daily market rate found for {material === 'gold' ? `${purity} Gold` : `${purity} Silver`}. Please update rates using &ldquo;Gold/Silver Prices&rdquo; on the dashboard.
+                    </span>
                   </div>
-                  <div className="text-xs text-amber-900 font-medium mt-1">
-                    Gold Value + Making Charges + Extra Amount ({formatPrice(parseFloat(extraAmount) || 0)})
-                  </div>
-                  <div className="text-[11px] text-amber-800/80 mt-0.5">
-                    Rate: {formatPrice(currentRatePerGram)}/g ({material === 'gold' ? `${purity} Gold` : `${purity} Silver`})
-                  </div>
+                  <span className="px-2.5 py-1 text-[10px] font-bold uppercase rounded-full bg-amber-200 text-amber-900 whitespace-nowrap">
+                    Rate Required
+                  </span>
                 </div>
-                <span className="self-start sm:self-center text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-amber-200/80 text-amber-900 border border-amber-300">
-                  Auto-Priced
-                </span>
-              </div>
+              ) : (
+                <div className="p-4 bg-amber-50/70 border border-amber-200/80 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div>
+                    <div className="text-xl sm:text-2xl font-bold text-gray-900 font-serif">
+                      {calculatedPrice > 0 ? formatPrice(calculatedPrice) : '₹0'}
+                    </div>
+                    <div className="text-xs text-amber-900 font-medium mt-1">
+                      {material === 'gold' ? 'Gold' : 'Silver'} Value + Making Charges + Extra Amount ({formatPrice(parseFloat(extraAmount) || 0)})
+                    </div>
+                    <div className="text-[11px] text-amber-800/80 mt-0.5">
+                      Rate: {formatPrice(currentRatePerGram)}/g ({material === 'gold' ? `${purity} Gold` : `${purity} Silver`})
+                    </div>
+                  </div>
+                  <span className="self-start sm:self-center text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-amber-200/80 text-amber-900 border border-amber-300">
+                    Auto-Priced
+                  </span>
+                </div>
+              )}
             </div>
 
             {/* Description */}

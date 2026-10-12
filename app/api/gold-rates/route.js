@@ -23,7 +23,8 @@ export async function PUT(request) {
     }
 
     const body = await request.json();
-    const updatedRates = await saveCentralizedRates(body);
+    const adminUid = session.username || 'admin';
+    const updatedRates = await saveCentralizedRates(body, adminUid);
 
     return NextResponse.json({
       success: true,

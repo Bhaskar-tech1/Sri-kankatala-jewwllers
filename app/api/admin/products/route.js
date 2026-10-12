@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { db } from '@/lib/firebase';
 import { collection, getDocs, addDoc, query, orderBy, serverTimestamp } from 'firebase/firestore';
 import { getAdminSession } from '@/lib/admin-auth';
+import { getCentralizedRates, calculateProductPrice } from '@/lib/pricing';
 
 function slugify(text) {
   return text
@@ -51,8 +52,6 @@ export async function GET() {
     );
   }
 }
-
-import { getCentralizedRates, calculateProductPrice } from '@/lib/pricing';
 
 export async function POST(request) {
   try {

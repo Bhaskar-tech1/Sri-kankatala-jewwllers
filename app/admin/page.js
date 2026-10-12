@@ -7,7 +7,7 @@ import Image from 'next/image';
 import {
   Plus, LogOut, Search, Edit3, Trash2, PackageCheck, PackageX,
   Loader2, RefreshCw, Sparkles, Filter, X, ChevronDown,
-  Layers, Gem, Shield
+  Layers, Gem, Shield, Coins, AlertTriangle, ArrowRight, CheckCircle2, History
 } from 'lucide-react';
 import { formatPrice } from '@/lib/utils';
 
@@ -52,6 +52,24 @@ export default function AdminDashboardPage() {
   const [filterCategory, setFilterCategory] = useState('all'); // all | [categoryName]
   const [filterStock, setFilterStock] = useState('all');       // all | in_stock | out_of_stock
 
+  // Gold & Silver Rates Modal & Confirmation States
+  const [ratesModalOpen, setRatesModalOpen] = useState(false);
+  const [ratesLoading, setRatesLoading] = useState(false);
+  const [ratesSaving, setRatesSaving] = useState(false);
+  const [loadedRates, setLoadedRates] = useState(null);
+  const [editingRates, setEditingRates] = useState({
+    gold22k: '',
+    gold24k: '',
+    gold18k: '',
+    silver925: '',
+    silverPremium: '',
+    silverArticles: '',
+  });
+  const [confirmationOpen, setConfirmationOpen] = useState(false);
+  const [rateChanges, setRateChanges] = useState([]);
+  const [ratesError, setRatesError] = useState('');
+  const [ratesSuccessMessage, setRatesSuccessMessage] = useState('');
+
   // 1. Check Authentication
   useEffect(() => {
     async function checkAuth() {
@@ -83,6 +101,134 @@ export default function AdminDashboardPage() {
       console.error('Failed to load products:', err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Open Rates Modal & Load Saved Rates
+  const handleOpenRatesModal = async () => {
+    setRatesModalOpen(true);
+    setRatesLoading(true);
+    setRatesError('');
+    setConfirmationOpen(false);
+    try {
+      const res = await fetch('/api/gold-rates');
+      const data = await res.json();
+      if (data?.rates) {
+        setLoadedRates(data.rates);
+        setEditingRates({
+          gold22k: data.rates.gold22k !== undefined ? String(data.rates.gold22k) : '',
+          gold24k: data.rates.gold24k !== undefined ? String(data.rates.gold24k) : '',
+          gold18k: data.rates.gold18k !== undefined ? String(data.rates.gold18k) : '',
+          silver925: data.rates.silver925 !== undefined ? String(data.rates.silver925) : '',
+          silverPremium: data.rates.silverPremium !== undefined ? String(data.rates.silverPremium) : '',
+          silverArticles: data.rates.silverArticles !== undefined ? String(data.rates.silverArticles) : '',
+        });
+      } else {
+        setLoadedRates({});
+        setEditingRates({
+          gold22k: '',
+          gold24k: '',
+          gold18k: '',
+          silver925: '',
+          silverPremium: '',
+          silverArticles: '',
+        });
+      }
+    } catch (err) {
+      console.error('Failed to load current rates:', err);
+      setRatesError('Failed to load daily rates from server.');
+    } finally {
+      setRatesLoading(false);
+    }
+  };
+
+  // Review Rate Changes (Mandatory confirmation check before save)
+  const handleReviewRateChanges = (e) => {
+    e.preventDefault();
+    setRatesError('');
+
+    const rateKeys = [
+      { key: 'gold22k', label: '22K Gold' },
+      { key: 'gold24k', label: '24K Gold' },
+      { key: 'gold18k', label: '18K Gold' },
+      { key: 'silver925', label: '92.5% Silver' },
+      { key: 'silverPremium', label: 'Premium (Gold Coated) Silver' },
+      { key: 'silverArticles', label: 'Traditional Silver' },
+    ];
+
+    for (const item of rateKeys) {
+      const val = parseFloat(editingRates[item.key]);
+      if (isNaN(val) || val <= 0) {
+        setRatesError(`Please enter a valid rate for ${item.label}.`);
+        return;
+      }
+    }
+
+    const changes = [];
+    for (const item of rateKeys) {
+      const hasOld = loadedRates && loadedRates[item.key] !== undefined && loadedRates[item.key] !== null && loadedRates[item.key] !== '';
+      const oldVal = hasOld ? Number(loadedRates[item.key]) : null;
+      const newVal = parseFloat(editingRates[item.key]);
+      if (oldVal !== newVal) {
+        changes.push({
+          key: item.key,
+          label: item.label,
+          oldVal,
+          newVal,
+          diff: oldVal !== null ? newVal - oldVal : null,
+        });
+      }
+    }
+
+    if (changes.length === 0) {
+      setRatesError('No rate changes detected. Modify at least one rate before saving.');
+      return;
+    }
+
+    setRateChanges(changes);
+    setConfirmationOpen(true);
+  };
+
+  // Confirm and Save Rates to Firestore
+  const handleConfirmSaveRates = async () => {
+    setRatesSaving(true);
+    setRatesError('');
+
+    try {
+      const payload = {
+        gold22k: parseFloat(editingRates.gold22k),
+        gold24k: parseFloat(editingRates.gold24k),
+        gold18k: parseFloat(editingRates.gold18k),
+        silver925: parseFloat(editingRates.silver925),
+        silverPremium: parseFloat(editingRates.silverPremium),
+        silverArticles: parseFloat(editingRates.silverArticles),
+      };
+
+      const res = await fetch('/api/gold-rates', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to update daily rates');
+      }
+
+      setConfirmationOpen(false);
+      setRatesModalOpen(false);
+      setRatesSuccessMessage('Daily market rates updated successfully! Product prices refreshed.');
+
+      // Refresh product prices automatically
+      await fetchProducts();
+
+      setTimeout(() => {
+        setRatesSuccessMessage('');
+      }, 4000);
+    } catch (err) {
+      setRatesError(err.message || 'Error updating daily rates');
+    } finally {
+      setRatesSaving(false);
     }
   };
 
@@ -251,6 +397,16 @@ export default function AdminDashboardPage() {
           </div>
 
           <div className="flex items-center gap-2.5 sm:gap-3">
+            {/* Gold/Silver Prices Button */}
+            <button
+              onClick={handleOpenRatesModal}
+              className="px-3.5 py-2 bg-amber-50 hover:bg-amber-100 border border-amber-200/90 text-amber-900 text-xs sm:text-sm font-semibold rounded-xl flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
+              title="Manage daily market gold & silver rates"
+            >
+              <Coins className="w-4 h-4 text-amber-700" />
+              <span>Gold/Silver Prices</span>
+            </button>
+
             <Link
               href="/admin/add"
               className="px-4 py-2 bg-[#C8102E] hover:bg-[#A00D24] text-white text-xs sm:text-sm font-semibold rounded-xl shadow-md shadow-[#C8102E]/20 flex items-center gap-1.5 transition-all cursor-pointer"
@@ -844,6 +1000,387 @@ export default function AdminDashboardPage() {
           )}
         </div>
       </main>
+
+      {/* Floating Success Notification */}
+      {ratesSuccessMessage && (
+        <div className="fixed top-5 right-5 z-50 bg-emerald-700 text-white px-5 py-3.5 rounded-2xl shadow-xl flex items-center gap-3 animate-modal-card">
+          <CheckCircle2 className="w-5 h-5 text-emerald-200 flex-shrink-0" />
+          <span className="text-xs sm:text-sm font-medium">{ratesSuccessMessage}</span>
+          <button
+            onClick={() => setRatesSuccessMessage('')}
+            className="text-white/80 hover:text-white ml-2 cursor-pointer"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+
+      {/* Gold & Silver Daily Rates Modal */}
+      {ratesModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-modal-backdrop">
+          <div className="bg-white rounded-2xl shadow-2xl border border-gray-100 max-w-xl w-full max-h-[92vh] flex flex-col overflow-hidden animate-modal-card">
+            {/* Modal Header */}
+            <div className="p-5 sm:p-6 border-b border-gray-100 flex items-center justify-between bg-amber-50/40">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-900 flex items-center justify-center">
+                  <Coins className="w-5 h-5 text-amber-800" />
+                </div>
+                <div>
+                  <h2 className="text-base sm:text-lg font-serif font-bold text-gray-900">
+                    Gold & Silver Daily Rates
+                  </h2>
+                  <p className="text-xs text-gray-500">
+                    Centralized rates in ₹ per gram used to auto-price catalog products
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setRatesModalOpen(false)}
+                className="w-8 h-8 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 flex items-center justify-center cursor-pointer transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Modal Content */}
+            <div className="p-5 sm:p-6 overflow-y-auto space-y-6 flex-1">
+              {ratesLoading ? (
+                <div className="py-12 flex flex-col items-center justify-center gap-2">
+                  <Loader2 className="w-8 h-8 text-amber-700 animate-spin" />
+                  <span className="text-xs text-gray-500">Loading current market rates...</span>
+                </div>
+              ) : (
+                <form id="rates-form" onSubmit={handleReviewRateChanges} className="space-y-6">
+                  {ratesError && (
+                    <div className="p-3.5 bg-red-50 border border-red-200 text-red-700 text-xs sm:text-sm rounded-xl flex items-start gap-2.5">
+                      <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5 text-red-600" />
+                      <span>{ratesError}</span>
+                    </div>
+                  )}
+
+                  {/* Section 1: Gold Prices */}
+                  <div className="p-4 bg-amber-50/30 border border-amber-200/60 rounded-2xl space-y-3.5">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="w-2.5 h-2.5 rounded-full bg-amber-500" />
+                        <h3 className="text-xs font-bold uppercase tracking-wider text-amber-950 font-serif">
+                          Gold Prices (₹ / gram)
+                        </h3>
+                      </div>
+                      <span className="text-[11px] text-amber-900/70">Per 1 Gram</span>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+                      {/* 22K Gold */}
+                      <div>
+                        <label className="block text-[11px] font-semibold text-gray-700 mb-1.5">
+                          22K Gold *
+                        </label>
+                        <div className="relative">
+                          <span className="absolute left-3 top-2.5 text-xs font-semibold text-gray-400 pointer-events-none">
+                            ₹
+                          </span>
+                          <input
+                            type="number"
+                            min="1"
+                            step="1"
+                            required
+                            value={editingRates.gold22k}
+                            onChange={(e) =>
+                              setEditingRates((prev) => ({ ...prev, gold22k: e.target.value }))
+                            }
+                            placeholder="6800"
+                            className="w-full pl-7 pr-8 py-2 bg-white border border-gray-200 rounded-xl text-gray-900 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all"
+                          />
+                          <span className="absolute right-2.5 top-2.5 text-[11px] text-gray-400 pointer-events-none">
+                            /g
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* 24K Gold */}
+                      <div>
+                        <label className="block text-[11px] font-semibold text-gray-700 mb-1.5">
+                          24K Gold *
+                        </label>
+                        <div className="relative">
+                          <span className="absolute left-3 top-2.5 text-xs font-semibold text-gray-400 pointer-events-none">
+                            ₹
+                          </span>
+                          <input
+                            type="number"
+                            min="1"
+                            step="1"
+                            required
+                            value={editingRates.gold24k}
+                            onChange={(e) =>
+                              setEditingRates((prev) => ({ ...prev, gold24k: e.target.value }))
+                            }
+                            placeholder="7400"
+                            className="w-full pl-7 pr-8 py-2 bg-white border border-gray-200 rounded-xl text-gray-900 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all"
+                          />
+                          <span className="absolute right-2.5 top-2.5 text-[11px] text-gray-400 pointer-events-none">
+                            /g
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* 18K Gold */}
+                      <div>
+                        <label className="block text-[11px] font-semibold text-gray-700 mb-1.5">
+                          18K Gold *
+                        </label>
+                        <div className="relative">
+                          <span className="absolute left-3 top-2.5 text-xs font-semibold text-gray-400 pointer-events-none">
+                            ₹
+                          </span>
+                          <input
+                            type="number"
+                            min="1"
+                            step="1"
+                            required
+                            value={editingRates.gold18k}
+                            onChange={(e) =>
+                              setEditingRates((prev) => ({ ...prev, gold18k: e.target.value }))
+                            }
+                            placeholder="5550"
+                            className="w-full pl-7 pr-8 py-2 bg-white border border-gray-200 rounded-xl text-gray-900 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all"
+                          />
+                          <span className="absolute right-2.5 top-2.5 text-[11px] text-gray-400 pointer-events-none">
+                            /g
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Section 2: Silver Prices */}
+                  <div className="p-4 bg-gray-50/70 border border-gray-200/70 rounded-2xl space-y-3.5">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="w-2.5 h-2.5 rounded-full bg-slate-400" />
+                        <h3 className="text-xs font-bold uppercase tracking-wider text-gray-800 font-serif">
+                          Silver Prices (₹ / gram)
+                        </h3>
+                      </div>
+                      <span className="text-[11px] text-gray-500">Per 1 Gram</span>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+                      {/* 92.5% Silver */}
+                      <div>
+                        <label className="block text-[11px] font-semibold text-gray-700 mb-1.5">
+                          92.5% Silver *
+                        </label>
+                        <div className="relative">
+                          <span className="absolute left-3 top-2.5 text-xs font-semibold text-gray-400 pointer-events-none">
+                            ₹
+                          </span>
+                          <input
+                            type="number"
+                            min="1"
+                            step="1"
+                            required
+                            value={editingRates.silver925}
+                            onChange={(e) =>
+                              setEditingRates((prev) => ({ ...prev, silver925: e.target.value }))
+                            }
+                            placeholder="95"
+                            className="w-full pl-7 pr-8 py-2 bg-white border border-gray-200 rounded-xl text-gray-900 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-slate-400 transition-all"
+                          />
+                          <span className="absolute right-2.5 top-2.5 text-[11px] text-gray-400 pointer-events-none">
+                            /g
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Premium (Gold Coated) */}
+                      <div>
+                        <label className="block text-[11px] font-semibold text-gray-700 mb-1.5">
+                          Premium (Gold Coated) *
+                        </label>
+                        <div className="relative">
+                          <span className="absolute left-3 top-2.5 text-xs font-semibold text-gray-400 pointer-events-none">
+                            ₹
+                          </span>
+                          <input
+                            type="number"
+                            min="1"
+                            step="1"
+                            required
+                            value={editingRates.silverPremium}
+                            onChange={(e) =>
+                              setEditingRates((prev) => ({ ...prev, silverPremium: e.target.value }))
+                            }
+                            placeholder="110"
+                            className="w-full pl-7 pr-8 py-2 bg-white border border-gray-200 rounded-xl text-gray-900 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-slate-400 transition-all"
+                          />
+                          <span className="absolute right-2.5 top-2.5 text-[11px] text-gray-400 pointer-events-none">
+                            /g
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Traditional Silver */}
+                      <div>
+                        <label className="block text-[11px] font-semibold text-gray-700 mb-1.5">
+                          Traditional Silver *
+                        </label>
+                        <div className="relative">
+                          <span className="absolute left-3 top-2.5 text-xs font-semibold text-gray-400 pointer-events-none">
+                            ₹
+                          </span>
+                          <input
+                            type="number"
+                            min="1"
+                            step="1"
+                            required
+                            value={editingRates.silverArticles}
+                            onChange={(e) =>
+                              setEditingRates((prev) => ({ ...prev, silverArticles: e.target.value }))
+                            }
+                            placeholder="90"
+                            className="w-full pl-7 pr-8 py-2 bg-white border border-gray-200 rounded-xl text-gray-900 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-slate-400 transition-all"
+                          />
+                          <span className="absolute right-2.5 top-2.5 text-[11px] text-gray-400 pointer-events-none">
+                            /g
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Metadata display */}
+                  {loadedRates?.updatedAt && (
+                    <div className="flex items-center gap-2 text-[11px] text-gray-400">
+                      <History className="w-3.5 h-3.5" />
+                      <span>
+                        Last updated:{' '}
+                        {new Date(loadedRates.updatedAt).toLocaleDateString('en-IN', {
+                          day: 'numeric',
+                          month: 'short',
+                          year: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })}
+                        {loadedRates.updatedBy ? ` by ${loadedRates.updatedBy}` : ''}
+                      </span>
+                    </div>
+                  )}
+                </form>
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-4 sm:p-5 border-t border-gray-100 flex items-center justify-end gap-3 bg-gray-50/60">
+              <button
+                type="button"
+                onClick={() => setRatesModalOpen(false)}
+                className="px-4 py-2 text-xs sm:text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                form="rates-form"
+                disabled={ratesLoading}
+                className="px-5 py-2.5 bg-amber-700 hover:bg-amber-800 text-white text-xs sm:text-sm font-semibold rounded-xl shadow-md shadow-amber-800/20 transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-60"
+              >
+                <span>Save Rates</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Mandatory Confirmation Dialog (Saves nothing until explicitly confirmed) */}
+      {confirmationOpen && (
+        <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-modal-backdrop">
+          <div className="bg-white rounded-2xl shadow-2xl border border-gray-100 max-w-md w-full p-6 text-left animate-modal-card">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 rounded-2xl bg-amber-100 text-amber-800 flex items-center justify-center flex-shrink-0">
+                <AlertTriangle className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="font-serif text-lg font-bold text-gray-900 leading-tight">
+                  Confirm Daily Rate Updates
+                </h3>
+                <p className="text-xs text-gray-500">
+                  Please review the rate changes before applying
+                </p>
+              </div>
+            </div>
+
+            {/* Warning Message */}
+            <div className="p-3 bg-amber-50 border border-amber-200 text-amber-900 text-xs rounded-xl mb-4 leading-relaxed">
+              <strong>Warning:</strong> Updating daily metal rates will automatically recalculate the catalogue prices for all matching products in the store and admin panel.
+            </div>
+
+            {/* Rate Differences Table */}
+            <div className="border border-gray-200 rounded-xl overflow-hidden mb-5">
+              <div className="bg-gray-50 px-3.5 py-2 text-[11px] font-semibold uppercase tracking-wider text-gray-500 grid grid-cols-3">
+                <span>Metal Variant</span>
+                <span className="text-center">Current</span>
+                <span className="text-right">New Rate</span>
+              </div>
+              <div className="divide-y divide-gray-100 max-h-48 overflow-y-auto">
+                {rateChanges.map((change) => (
+                  <div key={change.key} className="px-3.5 py-2.5 text-xs grid grid-cols-3 items-center">
+                    <span className="font-medium text-gray-800">{change.label}</span>
+                    <span className="text-gray-500 text-center font-mono">
+                      {change.oldVal !== null ? `${formatPrice(change.oldVal)}/g` : 'Not set'}
+                    </span>
+                    <div className="text-right">
+                      <span className="font-bold text-gray-900 font-mono">{formatPrice(change.newVal)}/g</span>
+                      <span
+                        className={`block text-[10px] font-semibold ${
+                          change.diff === null || change.diff >= 0 ? 'text-emerald-700' : 'text-red-700'
+                        }`}
+                      >
+                        {change.diff === null
+                          ? 'New rate'
+                          : change.diff >= 0
+                          ? `+${formatPrice(change.diff)}`
+                          : `-${formatPrice(Math.abs(change.diff))}`}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Confirmation Action Buttons */}
+            <div className="flex items-center justify-end gap-3 pt-2">
+              <button
+                type="button"
+                disabled={ratesSaving}
+                onClick={() => setConfirmationOpen(false)}
+                className="px-4 py-2.5 text-xs sm:text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors cursor-pointer"
+              >
+                Go Back & Edit
+              </button>
+              <button
+                type="button"
+                disabled={ratesSaving}
+                onClick={handleConfirmSaveRates}
+                className="px-5 py-2.5 bg-[#C8102E] hover:bg-[#A00D24] text-white text-xs sm:text-sm font-semibold rounded-xl shadow-lg shadow-[#C8102E]/20 transition-all flex items-center gap-2 cursor-pointer disabled:opacity-60"
+              >
+                {ratesSaving ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Applying Changes...</span>
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle2 className="w-4 h-4" />
+                    <span>Confirm & Update Rates</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
