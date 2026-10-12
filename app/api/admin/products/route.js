@@ -19,10 +19,27 @@ export async function GET() {
     const q = query(productsRef, orderBy('createdAt', 'desc'));
     const snapshot = await getDocs(q);
 
-    const products = snapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
+    const rates = await getCentralizedRates();
+    const products = snapshot.docs.map((doc) => {
+      const data = doc.data();
+      let price = data.price;
+      if (data.weightGrams && data.makingChargeValue !== undefined) {
+        const dynamicPrice = calculateProductPrice({
+          weightGrams: data.weightGrams,
+          material: data.material,
+          purity: data.purity,
+          makingChargeType: data.makingChargeType,
+          makingChargeValue: data.makingChargeValue,
+          rates,
+        });
+        if (dynamicPrice > 0) price = dynamicPrice;
+      }
+      return {
+        id: doc.id,
+        ...data,
+        price,
+      };
+    });
 
     return NextResponse.json({ products });
   } catch (error) {
@@ -33,6 +50,8 @@ export async function GET() {
     );
   }
 }
+
+import { getCentralizedRates, calculateProductPrice } from '@/lib/pricing';
 
 export async function POST(request) {
   try {
@@ -51,16 +70,34 @@ export async function POST(request) {
       weightGrams,
       purity,
       price,
+      makingChargeType = 'percentage',
+      makingChargeValue = 0,
       images,
       stockStatus = 'in_stock',
       featured = false,
     } = body;
 
-    if (!name || !price || !category || !material) {
+    if (!name || !category || !material || !weightGrams) {
       return NextResponse.json(
-        { error: 'Name, price, material, and category are required' },
+        { error: 'Name, material, category, and weight are required' },
         { status: 400 }
       );
+    }
+
+    // Auto-calculate final product price from centralized rates if not explicitly passed
+    let finalPrice = Number(price) || 0;
+    const rates = await getCentralizedRates();
+    const calculatedPrice = calculateProductPrice({
+      weightGrams: Number(weightGrams) || 0,
+      material,
+      purity,
+      makingChargeType,
+      makingChargeValue,
+      rates,
+    });
+
+    if (!finalPrice || finalPrice <= 0) {
+      finalPrice = calculatedPrice;
     }
 
     // Generate unique slug
@@ -75,8 +112,10 @@ export async function POST(request) {
       audience: (audience || 'women').toLowerCase(),
       category: category.trim(),
       weightGrams: Number(weightGrams) || 0,
-      purity: purity || (material.toLowerCase() === 'gold' ? '22K' : '92.5 Silver'),
-      price: Number(price) || 0,
+      purity: purity || (material.toLowerCase() === 'gold' ? '22K' : '92.5 Sterling'),
+      makingChargeType: makingChargeType === 'milligrams' ? 'milligrams' : 'percentage',
+      makingChargeValue: Number(makingChargeValue) || 0,
+      price: finalPrice,
       images: Array.isArray(images) && images.length > 0 ? images : ['/images/categories/Necklaces.png'],
       stockStatus: stockStatus || 'in_stock',
       featured: Boolean(featured),

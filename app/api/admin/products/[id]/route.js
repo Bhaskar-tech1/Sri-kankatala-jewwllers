@@ -33,6 +33,7 @@ export async function PUT(request, { params }) {
     // Sanitize numeric fields if present
     if (updates.price !== undefined) updates.price = Number(updates.price);
     if (updates.weightGrams !== undefined) updates.weightGrams = Number(updates.weightGrams);
+    if (updates.makingChargeValue !== undefined) updates.makingChargeValue = Number(updates.makingChargeValue);
 
     updates.updatedAt = new Date().toISOString();
 

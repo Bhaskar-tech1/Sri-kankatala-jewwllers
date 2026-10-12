@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/firebase';
 import { collection, getDocs, query, orderBy } from 'firebase/firestore';
+import { getCentralizedRates, calculateProductPrice } from '@/lib/pricing';
 
 export async function GET(request) {
   try {
@@ -15,10 +16,27 @@ export async function GET(request) {
       const snapshot = await getDocs(q);
 
       if (!snapshot.empty) {
-        products = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
+        const rates = await getCentralizedRates();
+        products = snapshot.docs.map((doc) => {
+          const data = doc.data();
+          let price = data.price;
+          if (data.weightGrams && data.makingChargeValue !== undefined) {
+            const dynamicPrice = calculateProductPrice({
+              weightGrams: data.weightGrams,
+              material: data.material,
+              purity: data.purity,
+              makingChargeType: data.makingChargeType,
+              makingChargeValue: data.makingChargeValue,
+              rates,
+            });
+            if (dynamicPrice > 0) price = dynamicPrice;
+          }
+          return {
+            id: doc.id,
+            ...data,
+            price,
+          };
+        });
       }
     } catch (fsErr) {
       console.warn('Firestore fetch failed:', fsErr.message);

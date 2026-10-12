@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -8,6 +8,12 @@ import {
   ArrowLeft, CheckCircle2, AlertCircle,
   ImagePlus, Loader2, Check
 } from 'lucide-react';
+import { formatPrice } from '@/lib/utils';
+import {
+  DEFAULT_RATES,
+  getRatePerGram,
+  calculateProductPrice,
+} from '@/lib/pricing';
 
 const CATEGORIES = [
   'Necklaces',
@@ -55,9 +61,11 @@ export default function EditProductPage() {
   const [customCategory, setCustomCategory] = useState('');
   const [purity, setPurity] = useState('22K');
   const [weightGrams, setWeightGrams] = useState('');
-  const [price, setPrice] = useState('');
+  const [makingChargeType, setMakingChargeType] = useState('percentage'); // 'percentage' | 'milligrams'
+  const [makingChargeValue, setMakingChargeValue] = useState('');
   const [stockStatus, setStockStatus] = useState('in_stock');
   const [featured, setFeatured] = useState(false);
+  const [centralizedRates, setCentralizedRates] = useState(DEFAULT_RATES);
 
   // Image Upload State
   const [imagePreview, setImagePreview] = useState('');
@@ -91,7 +99,8 @@ export default function EditProductPage() {
 
         setPurity(p.purity || '22K');
         setWeightGrams(p.weightGrams?.toString() || '');
-        setPrice(p.price?.toString() || '');
+        setMakingChargeType(p.makingChargeType || 'percentage');
+        setMakingChargeValue(p.makingChargeValue !== undefined ? p.makingChargeValue.toString() : '');
         setStockStatus(p.stockStatus || 'in_stock');
         setFeatured(Boolean(p.featured));
 
@@ -105,10 +114,40 @@ export default function EditProductPage() {
       }
     }
 
+    async function loadRates() {
+      try {
+        const res = await fetch('/api/gold-rates');
+        const data = await res.json();
+        if (data?.rates) {
+          setCentralizedRates(data.rates);
+        }
+      } catch (err) {
+        console.warn('Could not load centralized rates:', err);
+      }
+    }
+
     if (id) {
       loadProduct();
+      loadRates();
     }
-  }, [id]);
+  }, [id, router]);
+
+  // Current rate per gram based on material & purity
+  const currentRatePerGram = useMemo(() => {
+    return getRatePerGram(material, purity, centralizedRates);
+  }, [material, purity, centralizedRates]);
+
+  // Real-time auto-calculated price using centralized rates & making charges
+  const calculatedPrice = useMemo(() => {
+    return calculateProductPrice({
+      weightGrams: parseFloat(weightGrams) || 0,
+      material,
+      purity,
+      makingChargeType,
+      makingChargeValue: parseFloat(makingChargeValue) || 0,
+      rates: centralizedRates,
+    });
+  }, [weightGrams, material, purity, makingChargeType, makingChargeValue, centralizedRates]);
 
   // Automatic upload to Cloudinary upon selecting a new image
   const handleFileChange = async (e) => {
@@ -148,6 +187,20 @@ export default function EditProductPage() {
     if (submitStatus !== 'idle') return;
     setError('');
 
+    if (!weightGrams || parseFloat(weightGrams) <= 0) {
+      setError('Please enter a valid product weight in grams.');
+      return;
+    }
+
+    if (!makingChargeValue || parseFloat(makingChargeValue) < 0) {
+      setError(
+        `Please enter the making charge ${
+          makingChargeType === 'percentage' ? 'percentage' : 'in milligrams per gram'
+        }.`
+      );
+      return;
+    }
+
     if (uploadingImage) {
       setError('Please wait for the image upload to complete.');
       return;
@@ -171,7 +224,9 @@ export default function EditProductPage() {
         category: finalCategory,
         purity,
         weightGrams: parseFloat(weightGrams) || 0,
-        price: parseFloat(price) || 0,
+        makingChargeType,
+        makingChargeValue: parseFloat(makingChargeValue) || 0,
+        price: calculatedPrice,
         stockStatus,
         featured,
         images: [cloudinaryUrl],
@@ -363,7 +418,7 @@ export default function EditProductPage() {
               </div>
             </div>
 
-            {/* Weight & Price */}
+            {/* Weight & Making Charge Type */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               <div>
                 <label className="block text-xs font-semibold uppercase tracking-wider text-gray-700 mb-2">
@@ -377,7 +432,7 @@ export default function EditProductPage() {
                     value={weightGrams}
                     onChange={(e) => setWeightGrams(e.target.value)}
                     required
-                    className="w-full pl-4 pr-10 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#8B0000] focus:bg-white transition-all"
+                    className="w-full pl-4 pr-16 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#8B0000] focus:bg-white transition-all"
                   />
                   <span className="absolute right-3.5 top-3.5 text-xs font-semibold text-gray-400 pointer-events-none">
                     grams
@@ -387,20 +442,69 @@ export default function EditProductPage() {
 
               <div>
                 <label className="block text-xs font-semibold uppercase tracking-wider text-gray-700 mb-2">
-                  Price (₹) *
+                  Making Charge Type *
+                </label>
+                <select
+                  value={makingChargeType}
+                  onChange={(e) => setMakingChargeType(e.target.value)}
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#8B0000] focus:bg-white transition-all cursor-pointer"
+                >
+                  <option value="percentage">Percentage (%)</option>
+                  <option value="milligrams">Milligrams (mg per gram)</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Making Charge Value & Auto-Calculated Price */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              <div>
+                <label className="block text-xs font-semibold uppercase tracking-wider text-gray-700 mb-2">
+                  {makingChargeType === 'percentage'
+                    ? 'Making Charge Percentage (%) *'
+                    : 'Making Charge (mg per gram) *'}
                 </label>
                 <div className="relative">
-                  <span className="absolute left-3.5 top-3.5 text-sm font-semibold text-gray-400 pointer-events-none">
-                    ₹
-                  </span>
                   <input
                     type="number"
+                    step={makingChargeType === 'percentage' ? '0.1' : '1'}
                     min="0"
-                    value={price}
-                    onChange={(e) => setPrice(e.target.value)}
+                    value={makingChargeValue}
+                    onChange={(e) => setMakingChargeValue(e.target.value)}
+                    placeholder={
+                      makingChargeType === 'percentage'
+                        ? 'e.g. 12%'
+                        : 'e.g. 150 mg, 200 mg, or 500 mg'
+                    }
                     required
-                    className="w-full pl-8 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#8B0000] focus:bg-white transition-all"
+                    className="w-full pl-4 pr-14 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#8B0000] focus:bg-white transition-all"
                   />
+                  <span className="absolute right-3.5 top-3.5 text-xs font-semibold text-gray-400 pointer-events-none">
+                    {makingChargeType === 'percentage' ? '%' : 'mg/g'}
+                  </span>
+                </div>
+                <span className="text-[11px] text-gray-400 mt-1 block">
+                  {makingChargeType === 'percentage'
+                    ? 'Calculated as percentage on gold metal value'
+                    : 'Wastage / making in milligrams per 1 gram of jewellery'}
+                </span>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold uppercase tracking-wider text-gray-700 mb-2">
+                  Auto-Calculated Price (Live)
+                </label>
+                <div className="p-3 bg-amber-50/70 border border-amber-200/80 rounded-xl flex items-center justify-between min-h-[48px]">
+                  <div>
+                    <div className="text-base font-bold text-gray-900 font-serif">
+                      {calculatedPrice > 0 ? formatPrice(calculatedPrice) : '₹0'}
+                    </div>
+                    <div className="text-[11px] text-amber-900 font-medium mt-0.5">
+                      Rate: {formatPrice(currentRatePerGram)}/g ({material === 'gold' ? `${purity} Gold` : `${purity} Silver`})
+                    </div>
+                  </div>
+                  <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-200/80 text-amber-900 border border-amber-300">
+                    Auto-Priced
+                  </span>
                 </div>
               </div>
             </div>
