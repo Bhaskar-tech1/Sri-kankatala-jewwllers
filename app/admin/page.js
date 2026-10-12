@@ -409,10 +409,11 @@ export default function AdminDashboardPage() {
 
             <Link
               href="/admin/add"
-              className="px-4 py-2 bg-[#C8102E] hover:bg-[#A00D24] text-white text-xs sm:text-sm font-semibold rounded-xl shadow-md shadow-[#C8102E]/20 flex items-center gap-1.5 transition-all cursor-pointer"
+              style={{ color: '#ffffff' }}
+              className="px-4 py-2 bg-[#C8102E] hover:bg-[#A00D24] !text-white text-xs sm:text-sm font-semibold rounded-xl shadow-md shadow-[#C8102E]/20 flex items-center gap-1.5 transition-all cursor-pointer"
             >
-              <Plus className="w-4 h-4" />
-              <span>Add Product</span>
+              <Plus className="w-4 h-4 !text-white" style={{ color: '#ffffff', stroke: '#ffffff' }} />
+              <span className="!text-white" style={{ color: '#ffffff' }}>Add Product</span>
             </Link>
 
             <button
@@ -677,10 +678,11 @@ export default function AdminDashboardPage() {
               {products.length === 0 ? (
                 <Link
                   href="/admin/add"
-                  className="inline-flex items-center gap-1.5 px-5 py-2.5 bg-[#C8102E] hover:bg-[#A00D24] text-white text-xs font-semibold rounded-xl shadow-md transition-colors"
+                  style={{ color: '#ffffff' }}
+                  className="inline-flex items-center gap-1.5 px-5 py-2.5 bg-[#C8102E] hover:bg-[#A00D24] !text-white text-xs font-semibold rounded-xl shadow-md transition-colors"
                 >
-                  <Plus className="w-4 h-4" />
-                  <span>Add First Product</span>
+                  <Plus className="w-4 h-4 !text-white" style={{ color: '#ffffff', stroke: '#ffffff' }} />
+                  <span className="!text-white" style={{ color: '#ffffff' }}>Add First Product</span>
                 </Link>
               ) : (
                 <button
