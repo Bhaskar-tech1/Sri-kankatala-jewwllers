@@ -63,6 +63,7 @@ export default function EditProductPage() {
   const [weightGrams, setWeightGrams] = useState('');
   const [makingChargeType, setMakingChargeType] = useState('percentage'); // 'percentage' | 'milligrams'
   const [makingChargeValue, setMakingChargeValue] = useState('');
+  const [extraAmount, setExtraAmount] = useState('0');
   const [stockStatus, setStockStatus] = useState('in_stock');
   const [featured, setFeatured] = useState(false);
   const [centralizedRates, setCentralizedRates] = useState(DEFAULT_RATES);
@@ -101,6 +102,7 @@ export default function EditProductPage() {
         setWeightGrams(p.weightGrams?.toString() || '');
         setMakingChargeType(p.makingChargeType || 'percentage');
         setMakingChargeValue(p.makingChargeValue !== undefined ? p.makingChargeValue.toString() : '');
+        setExtraAmount(p.extraAmount !== undefined ? p.extraAmount.toString() : '0');
         setStockStatus(p.stockStatus || 'in_stock');
         setFeatured(Boolean(p.featured));
 
@@ -137,7 +139,7 @@ export default function EditProductPage() {
     return getRatePerGram(material, purity, centralizedRates);
   }, [material, purity, centralizedRates]);
 
-  // Real-time auto-calculated price using centralized rates & making charges
+  // Real-time auto-calculated price using centralized rates, making charges & extra amount
   const calculatedPrice = useMemo(() => {
     return calculateProductPrice({
       weightGrams: parseFloat(weightGrams) || 0,
@@ -145,9 +147,10 @@ export default function EditProductPage() {
       purity,
       makingChargeType,
       makingChargeValue: parseFloat(makingChargeValue) || 0,
+      extraAmount: parseFloat(extraAmount) || 0,
       rates: centralizedRates,
     });
-  }, [weightGrams, material, purity, makingChargeType, makingChargeValue, centralizedRates]);
+  }, [weightGrams, material, purity, makingChargeType, makingChargeValue, extraAmount, centralizedRates]);
 
   // Automatic upload to Cloudinary upon selecting a new image
   const handleFileChange = async (e) => {
@@ -226,6 +229,7 @@ export default function EditProductPage() {
         weightGrams: parseFloat(weightGrams) || 0,
         makingChargeType,
         makingChargeValue: parseFloat(makingChargeValue) || 0,
+        extraAmount: parseFloat(extraAmount) || 0,
         price: calculatedPrice,
         stockStatus,
         featured,
@@ -455,7 +459,7 @@ export default function EditProductPage() {
               </div>
             </div>
 
-            {/* Making Charge Value & Auto-Calculated Price */}
+            {/* Making Charge Value & Extra Amount */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               <div>
                 <label className="block text-xs font-semibold uppercase tracking-wider text-gray-700 mb-2">
@@ -491,21 +495,48 @@ export default function EditProductPage() {
 
               <div>
                 <label className="block text-xs font-semibold uppercase tracking-wider text-gray-700 mb-2">
-                  Auto-Calculated Price (Live)
+                  Extra Amount (₹)
                 </label>
-                <div className="p-3 bg-amber-50/70 border border-amber-200/80 rounded-xl flex items-center justify-between min-h-[48px]">
-                  <div>
-                    <div className="text-base font-bold text-gray-900 font-serif">
-                      {calculatedPrice > 0 ? formatPrice(calculatedPrice) : '₹0'}
-                    </div>
-                    <div className="text-[11px] text-amber-900 font-medium mt-0.5">
-                      Rate: {formatPrice(currentRatePerGram)}/g ({material === 'gold' ? `${purity} Gold` : `${purity} Silver`})
-                    </div>
-                  </div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-200/80 text-amber-900 border border-amber-300">
-                    Auto-Priced
+                <div className="relative">
+                  <span className="absolute left-3.5 top-3.5 text-sm font-semibold text-gray-400 pointer-events-none">
+                    ₹
                   </span>
+                  <input
+                    type="number"
+                    min="0"
+                    step="1"
+                    value={extraAmount}
+                    onChange={(e) => setExtraAmount(e.target.value)}
+                    placeholder="0"
+                    className="w-full pl-8 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#8B0000] focus:bg-white transition-all"
+                  />
                 </div>
+                <span className="text-[11px] text-gray-400 mt-1 block">
+                  Additional fixed charges (e.g. stones, gemstones, hallmark). Default is ₹0.
+                </span>
+              </div>
+            </div>
+
+            {/* Live Auto-Calculated Price Summary */}
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-wider text-gray-700 mb-2">
+                Auto-Calculated Total Price (Live)
+              </label>
+              <div className="p-4 bg-amber-50/70 border border-amber-200/80 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <div className="text-xl sm:text-2xl font-bold text-gray-900 font-serif">
+                    {calculatedPrice > 0 ? formatPrice(calculatedPrice) : '₹0'}
+                  </div>
+                  <div className="text-xs text-amber-900 font-medium mt-1">
+                    Gold Value + Making Charges + Extra Amount ({formatPrice(parseFloat(extraAmount) || 0)})
+                  </div>
+                  <div className="text-[11px] text-amber-800/80 mt-0.5">
+                    Rate: {formatPrice(currentRatePerGram)}/g ({material === 'gold' ? `${purity} Gold` : `${purity} Silver`})
+                  </div>
+                </div>
+                <span className="self-start sm:self-center text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-amber-200/80 text-amber-900 border border-amber-300">
+                  Auto-Priced
+                </span>
               </div>
             </div>
 

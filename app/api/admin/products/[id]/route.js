@@ -34,6 +34,7 @@ export async function PUT(request, { params }) {
     if (updates.price !== undefined) updates.price = Number(updates.price);
     if (updates.weightGrams !== undefined) updates.weightGrams = Number(updates.weightGrams);
     if (updates.makingChargeValue !== undefined) updates.makingChargeValue = Number(updates.makingChargeValue);
+    if (updates.extraAmount !== undefined) updates.extraAmount = Number(updates.extraAmount);
 
     updates.updatedAt = new Date().toISOString();
 

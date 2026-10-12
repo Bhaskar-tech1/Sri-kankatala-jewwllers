@@ -30,6 +30,7 @@ export async function GET() {
           purity: data.purity,
           makingChargeType: data.makingChargeType,
           makingChargeValue: data.makingChargeValue,
+          extraAmount: data.extraAmount || 0,
           rates,
         });
         if (dynamicPrice > 0) price = dynamicPrice;
@@ -72,6 +73,7 @@ export async function POST(request) {
       price,
       makingChargeType = 'percentage',
       makingChargeValue = 0,
+      extraAmount = 0,
       images,
       stockStatus = 'in_stock',
       featured = false,
@@ -93,6 +95,7 @@ export async function POST(request) {
       purity,
       makingChargeType,
       makingChargeValue,
+      extraAmount: Number(extraAmount) || 0,
       rates,
     });
 
@@ -115,6 +118,7 @@ export async function POST(request) {
       purity: purity || (material.toLowerCase() === 'gold' ? '22K' : '92.5 Sterling'),
       makingChargeType: makingChargeType === 'milligrams' ? 'milligrams' : 'percentage',
       makingChargeValue: Number(makingChargeValue) || 0,
+      extraAmount: Number(extraAmount) || 0,
       price: finalPrice,
       images: Array.isArray(images) && images.length > 0 ? images : ['/images/categories/Necklaces.png'],
       stockStatus: stockStatus || 'in_stock',

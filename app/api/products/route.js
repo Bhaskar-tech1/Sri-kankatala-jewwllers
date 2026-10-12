@@ -27,6 +27,7 @@ export async function GET(request) {
               purity: data.purity,
               makingChargeType: data.makingChargeType,
               makingChargeValue: data.makingChargeValue,
+              extraAmount: data.extraAmount || 0,
               rates,
             });
             if (dynamicPrice > 0) price = dynamicPrice;
