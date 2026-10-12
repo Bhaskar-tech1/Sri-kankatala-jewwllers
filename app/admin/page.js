@@ -67,6 +67,7 @@ export default function AdminDashboardPage() {
   });
   const [confirmationOpen, setConfirmationOpen] = useState(false);
   const [rateChanges, setRateChanges] = useState([]);
+  const [ratesError, setRatesError] = useState('');
   const [ratesSuccessMessage, setRatesSuccessMessage] = useState('');
 
   // Delete Product Confirmation Modal States
