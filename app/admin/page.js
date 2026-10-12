@@ -67,8 +67,12 @@ export default function AdminDashboardPage() {
   });
   const [confirmationOpen, setConfirmationOpen] = useState(false);
   const [rateChanges, setRateChanges] = useState([]);
-  const [ratesError, setRatesError] = useState('');
   const [ratesSuccessMessage, setRatesSuccessMessage] = useState('');
+
+  // Delete Product Confirmation Modal States
+  const [productToDelete, setProductToDelete] = useState(null);
+  const [deletingProduct, setDeletingProduct] = useState(false);
+  const [deleteError, setDeleteError] = useState('');
 
   // 1. Check Authentication
   useEffect(() => {
@@ -265,23 +269,31 @@ export default function AdminDashboardPage() {
     }
   };
 
-  // 5. Delete Product
-  const handleDeleteProduct = async (product) => {
-    if (!confirm(`Are you sure you want to delete "${product.name}"?`)) return;
-
-    setActionLoadingId(product.id);
+  // 5. Delete Product - Confirm & Execute
+  const handleConfirmDeleteProduct = async () => {
+    if (!productToDelete) return;
+    setDeletingProduct(true);
+    setDeleteError('');
+    const target = productToDelete;
     try {
-      const res = await fetch(`/api/admin/products/${product.id}`, {
+      const res = await fetch(`/api/admin/products/${target.id}`, {
         method: 'DELETE',
       });
 
       if (res.ok) {
-        setProducts((prev) => prev.filter((p) => p.id !== product.id));
+        setProducts((prev) => prev.filter((p) => p.id !== target.id));
+        setProductToDelete(null);
+        setRatesSuccessMessage(`"${target.name}" was permanently removed.`);
+        setTimeout(() => setRatesSuccessMessage(''), 4000);
+      } else {
+        const data = await res.json();
+        setDeleteError(data.error || 'Failed to delete product. Please try again.');
       }
     } catch (err) {
       console.error('Failed to delete product:', err);
+      setDeleteError('An unexpected network error occurred while deleting.');
     } finally {
-      setActionLoadingId(null);
+      setDeletingProduct(false);
     }
   };
 
@@ -983,8 +995,11 @@ export default function AdminDashboardPage() {
 
                               {/* Delete Button */}
                               <button
-                                onClick={() => handleDeleteProduct(product)}
-                                disabled={isOperating}
+                                onClick={() => {
+                                  setDeleteError('');
+                                  setProductToDelete(product);
+                                }}
+                                disabled={isOperating || deletingProduct}
                                 title="Delete Product"
                                 className="p-2 rounded-xl border border-red-200 text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
                               >
@@ -1376,6 +1391,124 @@ export default function AdminDashboardPage() {
                   <>
                     <CheckCircle2 className="w-4 h-4" />
                     <span>Confirm & Update Rates</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Custom Luxury Delete Product Confirmation Modal */}
+      {productToDelete && (
+        <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-modal-backdrop">
+          <div className="bg-white rounded-2xl shadow-2xl border border-gray-100 max-w-md w-full p-6 text-left animate-modal-card">
+            {/* Header with Red Warning Badge & Close Button */}
+            <div className="flex items-start justify-between mb-4">
+              <div className="flex items-center gap-3.5">
+                <div className="w-12 h-12 rounded-2xl bg-red-50 border border-red-100 text-[#C8102E] flex items-center justify-center flex-shrink-0 shadow-xs">
+                  <Trash2 className="w-6 h-6 stroke-[2]" />
+                </div>
+                <div>
+                  <h3 className="font-serif text-lg font-bold text-gray-900 leading-tight">
+                    Delete Product
+                  </h3>
+                  <p className="text-xs text-gray-500 mt-0.5">
+                    Are you sure you want to delete this product?
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  if (!deletingProduct) {
+                    setProductToDelete(null);
+                    setDeleteError('');
+                  }
+                }}
+                disabled={deletingProduct}
+                className="w-8 h-8 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 flex items-center justify-center transition-colors cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Error display if deletion fails */}
+            {deleteError && (
+              <div className="p-3 bg-red-50 border border-red-200 text-red-700 text-xs rounded-xl mb-3 flex items-start gap-2">
+                <AlertTriangle className="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5" />
+                <span>{deleteError}</span>
+              </div>
+            )}
+
+            {/* Product Summary Card */}
+            <div className="p-3.5 bg-[#FAF9F6] rounded-xl border border-[#E9E4DC] mb-4 flex items-center gap-3.5">
+              <div className="w-14 h-14 rounded-lg bg-white overflow-hidden flex-shrink-0 border border-gray-200/80 flex items-center justify-center relative">
+                {productToDelete.images?.[0] ? (
+                  <img
+                    src={productToDelete.images[0]}
+                    alt={productToDelete.name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <Gem className="w-6 h-6 text-amber-600/40" />
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <h4 className="font-serif font-bold text-sm text-gray-900 truncate">
+                  {productToDelete.name}
+                </h4>
+                <div className="flex items-center gap-1.5 mt-0.5 text-[11px] text-gray-500">
+                  <span className="capitalize">{productToDelete.material}</span>
+                  <span>•</span>
+                  <span>{productToDelete.category}</span>
+                  {productToDelete.weightGrams ? (
+                    <>
+                      <span>•</span>
+                      <span>{productToDelete.weightGrams}g</span>
+                    </>
+                  ) : null}
+                </div>
+                <div className="text-xs font-semibold text-gray-900 mt-1 font-mono">
+                  {formatPrice(productToDelete.price)}
+                </div>
+              </div>
+            </div>
+
+            {/* Warning Message */}
+            <div className="p-3 bg-amber-50/80 border border-amber-200/80 text-amber-900 text-xs rounded-xl mb-5 leading-relaxed">
+              <strong>Caution:</strong> This action cannot be undone. This product will be permanently removed from your online store and inventory.
+            </div>
+
+            {/* Confirmation Action Buttons */}
+            <div className="flex items-center justify-end gap-3 pt-1">
+              <button
+                type="button"
+                disabled={deletingProduct}
+                onClick={() => {
+                  setProductToDelete(null);
+                  setDeleteError('');
+                }}
+                className="px-4 py-2.5 text-xs sm:text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors cursor-pointer disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={deletingProduct}
+                onClick={handleConfirmDeleteProduct}
+                style={{ color: '#ffffff' }}
+                className="px-5 py-2.5 bg-[#C8102E] hover:bg-[#A00D24] !text-white text-xs sm:text-sm font-semibold rounded-xl shadow-lg shadow-[#C8102E]/25 transition-all flex items-center gap-2 cursor-pointer disabled:opacity-60"
+              >
+                {deletingProduct ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin !text-white" />
+                    <span className="!text-white">Deleting...</span>
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="w-4 h-4 !text-white stroke-[2]" />
+                    <span className="!text-white">Yes, Delete</span>
                   </>
                 )}
               </button>
