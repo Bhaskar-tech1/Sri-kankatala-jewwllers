@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { Home, ChevronRight, MapPin, ArrowRight } from 'lucide-react';
+import { MapPin, ArrowRight } from 'lucide-react';
 
 export const metadata = {
   title: 'About Sri Kankatala Jewellers | Ravulapalem',
@@ -11,18 +11,6 @@ export const metadata = {
 export default function AboutPage() {
   return (
     <div className="bg-white min-h-screen">
-      {/* Breadcrumbs */}
-      <div className="bg-skj-ivory border-b border-skj-border/50">
-        <div className="section-container py-3">
-          <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-xs text-skj-muted">
-            <Link href="/" className="hover:text-skj-olive transition-colors flex items-center gap-1">
-              <Home size={12} /> Home
-            </Link>
-            <ChevronRight size={12} aria-hidden="true" />
-            <span className="text-skj-charcoal font-medium">About Us</span>
-          </nav>
-        </div>
-      </div>
 
       {/* Hero section */}
       <section className="bg-skj-ivory text-skj-charcoal relative overflow-hidden">

@@ -4,8 +4,8 @@ import { useState, useMemo, useEffect, useCallback } from 'react';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import {
-  Search, SlidersHorizontal, X, ChevronDown, ChevronRight,
-  Home, LayoutGrid, List,
+  Search, SlidersHorizontal, X, ChevronDown,
+  LayoutGrid, List,
 } from 'lucide-react';
 import { getProductsByRoute, getCategories, getPurityOptions, filterAndSortProducts } from '@/lib/api';
 import { formatPrice } from '@/lib/utils';
@@ -288,21 +288,6 @@ export default function CatalogueView({ material, audience }) {
 
   return (
     <div className="bg-white min-h-screen">
-      {/* Breadcrumbs */}
-      <div className="bg-skj-ivory border-b border-skj-border/50">
-        <div className="section-container pt-6 pb-3">
-          <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-xs text-skj-muted">
-            <Link href="/" className="hover:text-skj-olive transition-colors flex items-center gap-1">
-              <Home size={12} />
-              Home
-            </Link>
-            <ChevronRight size={12} aria-hidden="true" />
-            <span className="text-skj-charcoal font-medium">
-              {pageTitle}
-            </span>
-          </nav>
-        </div>
-      </div>
 
       {/* Page header */}
       <div className="bg-skj-ivory/50 border-b border-skj-border/30">

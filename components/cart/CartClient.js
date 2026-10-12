@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import {
-  Minus, Plus, Trash2, ShoppingBag, ArrowLeft, Home, ChevronRight,
+  Minus, Plus, Trash2, ShoppingBag, ArrowLeft,
   MessageCircle, User, Phone, MapPin, AlertCircle,
 } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
@@ -67,18 +67,6 @@ export default function CartClient() {
   if (cart.length === 0) {
     return (
       <div className="bg-white min-h-screen">
-        {/* Breadcrumbs */}
-        <div className="bg-skj-ivory border-b border-skj-border/50">
-          <div className="section-container py-3">
-            <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-xs text-skj-muted">
-              <Link href="/" className="hover:text-skj-olive transition-colors flex items-center gap-1">
-                <Home size={12} /> Home
-              </Link>
-              <ChevronRight size={12} aria-hidden="true" />
-              <span className="text-skj-charcoal font-medium">Cart</span>
-            </nav>
-          </div>
-        </div>
 
         <div className="section-container py-20 text-center">
           <div className="w-20 h-20 mx-auto mb-6 bg-skj-ivory flex items-center justify-center">
@@ -108,18 +96,6 @@ export default function CartClient() {
 
   return (
     <div className="bg-white min-h-screen">
-      {/* Breadcrumbs */}
-      <div className="bg-skj-ivory border-b border-skj-border/50">
-        <div className="section-container pt-6 pb-3">
-          <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-xs text-skj-muted">
-            <Link href="/" className="hover:text-skj-olive transition-colors flex items-center gap-1">
-              <Home size={12} /> Home
-            </Link>
-            <ChevronRight size={12} aria-hidden="true" />
-            <span className="text-skj-charcoal font-medium">Cart ({cart.length})</span>
-          </nav>
-        </div>
-      </div>
 
       <div className="section-container py-8 lg:py-12">
         <h1

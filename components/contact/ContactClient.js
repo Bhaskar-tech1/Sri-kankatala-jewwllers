@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Home, ChevronRight, MapPin, Phone, Mail, Clock, Send, CheckCircle2 } from 'lucide-react';
+import { MapPin, Phone, Mail, Clock, Send, CheckCircle2 } from 'lucide-react';
 
 export default function ContactClient() {
   const [formData, setFormData] = useState({
@@ -43,18 +43,6 @@ export default function ContactClient() {
 
   return (
     <div className="bg-[#FAF9F5] flex flex-col min-h-[calc(100vh-80px)]">
-      {/* Breadcrumbs */}
-      <div className="bg-skj-ivory border-b border-skj-border/50">
-        <div className="section-container py-3">
-          <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-xs text-skj-muted">
-            <Link href="/" className="hover:text-skj-olive transition-colors flex items-center gap-1">
-              <Home size={12} /> Home
-            </Link>
-            <ChevronRight size={12} aria-hidden="true" />
-            <span className="text-skj-charcoal font-medium">Contact Us</span>
-          </nav>
-        </div>
-      </div>
 
       {/* Main Content */}
       <section className="flex-grow py-8 lg:py-12 flex justify-center">

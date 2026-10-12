@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ChevronRight, Home } from 'lucide-react';
+
 
 export const metadata = {
   title: 'Terms of Service | Sri Kankatala Jewellers',
@@ -9,18 +9,6 @@ export const metadata = {
 export default function TermsOfServicePage() {
   return (
     <div className="bg-white min-h-screen">
-      {/* Breadcrumbs */}
-      <div className="bg-skj-ivory border-b border-skj-border/50">
-        <div className="section-container pt-6 pb-3">
-          <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-xs text-skj-muted">
-            <Link href="/" className="hover:text-skj-olive transition-colors flex items-center gap-1">
-              <Home size={12} /> Home
-            </Link>
-            <ChevronRight size={12} aria-hidden="true" />
-            <span className="text-skj-charcoal font-medium">Terms of Service</span>
-          </nav>
-        </div>
-      </div>
 
       <div className="section-container py-12 lg:py-20 max-w-4xl">
         <h1 className="text-3xl sm:text-4xl lg:text-5xl font-semibold text-skj-charcoal mb-8" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>

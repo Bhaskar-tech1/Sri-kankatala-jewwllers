@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import {
-  ShoppingBag, Check, Minus, Plus, Home, ChevronRight, Heart, Share2, Truck,
+  ShoppingBag, Check, Minus, Plus, Heart, Share2, Truck,
   Shield, RefreshCw,
 } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
@@ -33,23 +33,6 @@ export default function ProductDetailClient({ product }) {
 
   return (
     <div className="bg-white min-h-screen">
-      {/* Breadcrumbs */}
-      <div className="bg-skj-ivory border-b border-skj-border/50">
-        <div className="section-container pt-6 pb-3">
-          <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-xs text-skj-muted flex-wrap">
-            <Link href="/" className="hover:text-skj-olive transition-colors flex items-center gap-1">
-              <Home size={12} />
-              Home
-            </Link>
-            <ChevronRight size={12} aria-hidden="true" />
-            <Link href={catalogueHref} className="hover:text-skj-olive transition-colors">
-              {materialLabel} {audienceLabel}
-            </Link>
-            <ChevronRight size={12} aria-hidden="true" />
-            <span className="text-skj-charcoal font-medium line-clamp-1">{product.name}</span>
-          </nav>
-        </div>
-      </div>
 
       {/* Product detail */}
       <div className="section-container py-8 lg:py-12">

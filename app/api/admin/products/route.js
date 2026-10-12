@@ -3,6 +3,7 @@ import { db } from '@/lib/firebase';
 import { collection, getDocs, addDoc, query, orderBy, serverTimestamp } from 'firebase/firestore';
 import { getAdminSession } from '@/lib/admin-auth';
 import { getCentralizedRates, calculateProductPrice } from '@/lib/pricing';
+import { addCustomCategory } from '@/lib/categories';
 
 function slugify(text) {
   return text
@@ -127,6 +128,15 @@ export async function POST(request) {
     };
 
     const docRef = await addDoc(collection(db, 'products'), newProduct);
+
+    // Register category in persistent categories storage if new
+    try {
+      if (newProduct.category && newProduct.category.toLowerCase() !== 'other') {
+        await addCustomCategory(newProduct.category);
+      }
+    } catch (catErr) {
+      console.warn('Auto-register category note:', catErr.message);
+    }
 
     return NextResponse.json({
       success: true,

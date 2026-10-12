@@ -6,7 +6,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import {
   ArrowLeft, CheckCircle2, AlertCircle,
-  ImagePlus, Loader2, Check
+  ImagePlus, Loader2, Check, FolderPlus, X
 } from 'lucide-react';
 import { formatPrice } from '@/lib/utils';
 import {
@@ -14,34 +14,7 @@ import {
   getRatePerGram,
   calculateProductPrice,
 } from '@/lib/pricing';
-
-const CATEGORIES = [
-  'Necklaces',
-  'Chokers',
-  'Harams',
-  'Kasumala / Temple Jewellery',
-  'Earrings',
-  'Jhumkas',
-  'Chandbalis',
-  'Studs',
-  'Bangles',
-  'Kadas',
-  'Bracelets',
-  'Rings',
-  'Pendants',
-  'Mangalsutras / Nallapusalu',
-  'Anklets (Payal / Pattilu)',
-  'Nose Pins / Mukkupudaka',
-  'Maang Tikka / Papidi Billa',
-  'Vaddanam (Waist Belts)',
-  'Vanki (Armlets / Bajuband)',
-  'Chains',
-  'Coins (Gold & Silver)',
-  'Silver Articles & Pooja Items',
-  'Idols & Murthis',
-  'Watches',
-  'Other',
-];
+import { DEFAULT_CATEGORIES } from '@/lib/categories';
 
 export default function EditProductPage() {
   const router = useRouter();
@@ -51,6 +24,13 @@ export default function EditProductPage() {
   // Submit State: 'idle' | 'submitting' | 'success'
   const [submitStatus, setSubmitStatus] = useState('idle');
   const [error, setError] = useState('');
+
+  // Dynamic Categories State
+  const [categoriesList, setCategoriesList] = useState(DEFAULT_CATEGORIES);
+  const [newCategoryModalOpen, setNewCategoryModalOpen] = useState(false);
+  const [newCategoryInput, setNewCategoryInput] = useState('');
+  const [newCategoryError, setNewCategoryError] = useState('');
+  const [savingCategory, setSavingCategory] = useState(false);
 
   // Form State
   const [name, setName] = useState('');
@@ -90,12 +70,9 @@ export default function EditProductPage() {
         setMaterial(p.material || 'gold');
         setAudience(p.audience || 'women');
 
-        // Check if category is in list, else set to Other + custom
-        if (CATEGORIES.includes(p.category)) {
+        if (p.category) {
           setCategory(p.category);
-        } else {
-          setCategory('Other');
-          setCustomCategory(p.category || '');
+          setCategoriesList((prev) => Array.from(new Set([...prev, p.category])).sort());
         }
 
         setPurity(p.purity || '22K');
@@ -128,11 +105,89 @@ export default function EditProductPage() {
       }
     }
 
+    async function loadDynamicCategories() {
+      try {
+        const res = await fetch('/api/categories');
+        const data = await res.json();
+        if (data?.categories && Array.isArray(data.categories)) {
+          setCategoriesList((prev) => Array.from(new Set([...prev, ...data.categories])).sort());
+        }
+      } catch (err) {
+        console.warn('Could not load dynamic categories:', err);
+      }
+    }
+
     if (id) {
+      loadDynamicCategories();
       loadProduct();
       loadRates();
     }
   }, [id, router]);
+
+  // Category selection handler (prompts modal on 'Other')
+  const handleCategoryChange = (e) => {
+    const val = e.target.value;
+    if (val === 'Other' || val === 'Others') {
+      setNewCategoryInput('');
+      setNewCategoryError('');
+      setNewCategoryModalOpen(true);
+    } else {
+      setCategory(val);
+      setCustomCategory('');
+    }
+  };
+
+  // Save new custom category to Firestore and select it
+  const handleSaveNewCategory = async (e) => {
+    if (e) e.preventDefault();
+    const trimmed = newCategoryInput.trim();
+    if (!trimmed) {
+      setNewCategoryError('Please enter a category name.');
+      return;
+    }
+    if (trimmed.toLowerCase() === 'other' || trimmed.toLowerCase() === 'others') {
+      setNewCategoryError('Please enter a specific category name (e.g. Brooches).');
+      return;
+    }
+
+    setSavingCategory(true);
+    setNewCategoryError('');
+    try {
+      const res = await fetch('/api/categories', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: trimmed }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to save new category');
+      }
+
+      if (data.categories) {
+        setCategoriesList(data.categories);
+      } else {
+        setCategoriesList((prev) => Array.from(new Set([...prev, trimmed])).sort());
+      }
+
+      setCategory(trimmed);
+      setCustomCategory('');
+      setNewCategoryModalOpen(false);
+      setNewCategoryInput('');
+    } catch (err) {
+      setNewCategoryError(err.message || 'Error saving category');
+    } finally {
+      setSavingCategory(false);
+    }
+  };
+
+  const handleCancelNewCategory = () => {
+    setNewCategoryModalOpen(false);
+    setNewCategoryInput('');
+    setNewCategoryError('');
+    if (!categoriesList.includes(category)) {
+      setCategory(categoriesList[0] || 'Necklaces');
+    }
+  };
 
   // Current rate per gram based on material & purity
   const currentRatePerGram = useMemo(() => {
@@ -225,6 +280,19 @@ export default function EditProductPage() {
 
     try {
       const finalCategory = category === 'Other' ? (customCategory.trim() || 'Other') : category;
+
+      // Automatically register new category to persistent Firestore storage if not present
+      if (finalCategory && finalCategory !== 'Other' && !categoriesList.includes(finalCategory)) {
+        try {
+          await fetch('/api/categories', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name: finalCategory }),
+          });
+        } catch (catErr) {
+          console.warn('Auto-save category note:', catErr.message);
+        }
+      }
 
       const payload = {
         name: name.trim(),
@@ -372,19 +440,35 @@ export default function EditProductPage() {
             {/* Category & Purity */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-gray-700 mb-2">
-                  Category *
-                </label>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-gray-700">
+                    Category *
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setNewCategoryInput('');
+                      setNewCategoryError('');
+                      setNewCategoryModalOpen(true);
+                    }}
+                    className="text-xs font-semibold text-[#8B0000] hover:text-[#5B0000] inline-flex items-center gap-1 cursor-pointer transition-colors"
+                    title="Add a new permanent category"
+                  >
+                    <FolderPlus className="w-3.5 h-3.5" />
+                    <span>+ Add New Category</span>
+                  </button>
+                </div>
                 <select
                   value={category}
-                  onChange={(e) => setCategory(e.target.value)}
-                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#8B0000] focus:bg-white transition-all"
+                  onChange={handleCategoryChange}
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#8B0000] focus:bg-white transition-all cursor-pointer"
                 >
-                  {CATEGORIES.map((cat) => (
+                  {categoriesList.map((cat) => (
                     <option key={cat} value={cat}>
                       {cat}
                     </option>
                   ))}
+                  <option value="Other">Other (Add Custom Category...)</option>
                 </select>
 
                 {category === 'Other' && (
@@ -700,6 +784,93 @@ export default function EditProductPage() {
             <span className="text-[11px] font-medium text-gray-400">
               Returning to dashboard...
             </span>
+          </div>
+        </div>
+      )}
+      {/* Modal: Add New Custom Category */}
+      {newCategoryModalOpen && (
+        <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-modal-backdrop">
+          <div className="bg-white rounded-2xl shadow-2xl border border-gray-100 max-w-md w-full p-6 text-left animate-modal-card">
+            {/* Header */}
+            <div className="flex items-start justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-11 h-11 rounded-2xl bg-amber-50 border border-amber-200/80 text-amber-800 flex items-center justify-center flex-shrink-0">
+                  <FolderPlus className="w-5 h-5 text-amber-700" />
+                </div>
+                <div>
+                  <h3 className="font-serif text-lg font-bold text-gray-900 leading-tight">
+                    Add New Category
+                  </h3>
+                  <p className="text-xs text-gray-500 mt-0.5">
+                    Saved to filters and visible for all future products
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={handleCancelNewCategory}
+                disabled={savingCategory}
+                className="w-8 h-8 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 flex items-center justify-center cursor-pointer transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {newCategoryError && (
+              <div className="p-3 bg-red-50 border border-red-200 text-red-700 text-xs rounded-xl mb-4 flex items-start gap-2">
+                <AlertCircle className="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5" />
+                <span>{newCategoryError}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleSaveNewCategory} className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold uppercase tracking-wider text-gray-700 mb-1.5">
+                  Category Name *
+                </label>
+                <input
+                  type="text"
+                  autoFocus
+                  required
+                  value={newCategoryInput}
+                  onChange={(e) => setNewCategoryInput(e.target.value)}
+                  placeholder="e.g. Brooches, Toe Rings, Waist Chains"
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#8B0000] focus:bg-white transition-all"
+                />
+                <span className="text-[11px] text-gray-400 mt-1.5 block">
+                  This category will be permanently added to your catalogue filters and product dropdown.
+                </span>
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-2">
+                <button
+                  type="button"
+                  disabled={savingCategory}
+                  onClick={handleCancelNewCategory}
+                  className="px-4 py-2 text-xs sm:text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={savingCategory}
+                  style={{ color: '#ffffff' }}
+                  className="px-5 py-2.5 bg-[#C8102E] hover:bg-[#A00D24] !text-white text-xs sm:text-sm font-semibold rounded-xl shadow-md shadow-[#C8102E]/20 transition-all flex items-center gap-2 cursor-pointer disabled:opacity-60"
+                >
+                  {savingCategory ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin !text-white" />
+                      <span className="!text-white">Saving Category...</span>
+                    </>
+                  ) : (
+                    <>
+                      <FolderPlus className="w-4 h-4 !text-white" />
+                      <span className="!text-white">Save & Select Category</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

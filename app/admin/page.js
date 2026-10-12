@@ -10,33 +10,7 @@ import {
   Layers, Gem, Shield, Coins, AlertTriangle, ArrowRight, CheckCircle2, History
 } from 'lucide-react';
 import { formatPrice } from '@/lib/utils';
-
-const DEFAULT_CATEGORIES = [
-  'Necklaces',
-  'Chokers',
-  'Harams',
-  'Kasumala / Temple Jewellery',
-  'Earrings',
-  'Jhumkas',
-  'Chandbalis',
-  'Studs',
-  'Bangles',
-  'Kadas',
-  'Bracelets',
-  'Rings',
-  'Pendants',
-  'Mangalsutras / Nallapusalu',
-  'Anklets (Payal / Pattilu)',
-  'Nose Pins / Mukkupudaka',
-  'Maang Tikka / Papidi Billa',
-  'Vaddanam (Waist Belts)',
-  'Vanki (Armlets / Bajuband)',
-  'Chains',
-  'Coins (Gold & Silver)',
-  'Silver Articles & Pooja Items',
-  'Idols & Murthis',
-  'Watches',
-];
+import { DEFAULT_CATEGORIES } from '@/lib/categories';
 
 export default function AdminDashboardPage() {
   const router = useRouter();
@@ -75,6 +49,22 @@ export default function AdminDashboardPage() {
   const [deletingProduct, setDeletingProduct] = useState(false);
   const [deleteError, setDeleteError] = useState('');
 
+  // Dynamic Categories from Firestore
+  const [dynamicCategories, setDynamicCategories] = useState([]);
+
+  // Fetch Categories from Firestore
+  const fetchCategories = async () => {
+    try {
+      const res = await fetch('/api/categories');
+      const data = await res.json();
+      if (res.ok && data.categories && Array.isArray(data.categories)) {
+        setDynamicCategories(data.categories);
+      }
+    } catch (err) {
+      console.warn('Failed to load dynamic categories:', err);
+    }
+  };
+
   // 1. Check Authentication
   useEffect(() => {
     async function checkAuth() {
@@ -85,6 +75,7 @@ export default function AdminDashboardPage() {
         } else {
           setCheckingAuth(false);
           fetchProducts();
+          fetchCategories();
         }
       } catch {
         router.push('/admin/login');
@@ -324,14 +315,14 @@ export default function AdminDashboardPage() {
     return { total, gold, silver, inStock, outOfStock };
   }, [products]);
 
-  // Dynamic available categories list (combines inventory categories + defaults)
+  // Dynamic available categories list (combines inventory categories + persistent custom categories + defaults)
   const availableCategories = useMemo(() => {
     const inventoryCats = products
       .map((p) => p.category)
       .filter(Boolean);
-    const combined = Array.from(new Set([...inventoryCats, ...DEFAULT_CATEGORIES]));
-    return combined.sort();
-  }, [products]);
+    const combined = Array.from(new Set([...inventoryCats, ...dynamicCategories, ...DEFAULT_CATEGORIES]));
+    return combined.sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
+  }, [products, dynamicCategories]);
 
   // Combinatorial Multi-Filter Logic
   const filteredProducts = useMemo(() => {
