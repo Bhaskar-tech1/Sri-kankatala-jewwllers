@@ -38,6 +38,51 @@ const DEFAULT_CATEGORIES = [
   'Watches',
 ];
 
+const RATE_VARIANTS = [
+  {
+    key: 'gold22k',
+    label: '22K Gold',
+    material: 'gold',
+    purityBadge: '916 Hallmark',
+    subLabel: 'Standard Jewellery Gold',
+  },
+  {
+    key: 'gold24k',
+    label: '24K Gold',
+    material: 'gold',
+    purityBadge: '999 Pure',
+    subLabel: 'Pure Gold (Bullion)',
+  },
+  {
+    key: 'gold18k',
+    label: '18K Gold',
+    material: 'gold',
+    purityBadge: '750 Hallmark',
+    subLabel: 'Designer & Diamond Jewellery',
+  },
+  {
+    key: 'silver925',
+    label: '92.5% Silver',
+    material: 'silver',
+    purityBadge: 'Sterling 925',
+    subLabel: 'Standard Silver Jewellery',
+  },
+  {
+    key: 'silverPremium',
+    label: 'Premium Silver',
+    material: 'silver',
+    purityBadge: 'Gold Coated',
+    subLabel: 'Gold-Plated / Antique Silver',
+  },
+  {
+    key: 'silverArticles',
+    label: 'Traditional Silver',
+    material: 'silver',
+    purityBadge: 'Articles & Pooja',
+    subLabel: 'Utensils, Lamps & Murthis',
+  },
+];
+
 export default function AdminDashboardPage() {
   const router = useRouter();
   const [checkingAuth, setCheckingAuth] = useState(true);
@@ -56,6 +101,9 @@ export default function AdminDashboardPage() {
   const [ratesModalOpen, setRatesModalOpen] = useState(false);
   const [ratesLoading, setRatesLoading] = useState(false);
   const [ratesSaving, setRatesSaving] = useState(false);
+  const [ratesMode, setRatesMode] = useState('specific'); // 'specific' | 'all'
+  const [selectedRateKey, setSelectedRateKey] = useState('gold22k');
+  const [specificNewRate, setSpecificNewRate] = useState('');
   const [loadedRates, setLoadedRates] = useState(null);
   const [editingRates, setEditingRates] = useState({
     gold22k: '',
@@ -115,14 +163,16 @@ export default function AdminDashboardPage() {
       const data = await res.json();
       if (data?.rates) {
         setLoadedRates(data.rates);
-        setEditingRates({
+        const initial = {
           gold22k: data.rates.gold22k !== undefined ? String(data.rates.gold22k) : '',
           gold24k: data.rates.gold24k !== undefined ? String(data.rates.gold24k) : '',
           gold18k: data.rates.gold18k !== undefined ? String(data.rates.gold18k) : '',
           silver925: data.rates.silver925 !== undefined ? String(data.rates.silver925) : '',
           silverPremium: data.rates.silverPremium !== undefined ? String(data.rates.silverPremium) : '',
           silverArticles: data.rates.silverArticles !== undefined ? String(data.rates.silverArticles) : '',
-        });
+        };
+        setEditingRates(initial);
+        setSpecificNewRate(initial[selectedRateKey] || '');
       } else {
         setLoadedRates({});
         setEditingRates({
@@ -133,6 +183,7 @@ export default function AdminDashboardPage() {
           silverPremium: '',
           silverArticles: '',
         });
+        setSpecificNewRate('');
       }
     } catch (err) {
       console.error('Failed to load current rates:', err);
@@ -142,21 +193,54 @@ export default function AdminDashboardPage() {
     }
   };
 
-  // Review Rate Changes (Mandatory confirmation check before save)
-  const handleReviewRateChanges = (e) => {
+  // Switch Selected Variant in Specific Mode
+  const handleSelectVariant = (key) => {
+    setSelectedRateKey(key);
+    setRatesError('');
+    const currentVal = editingRates[key] !== '' && editingRates[key] !== undefined
+      ? editingRates[key]
+      : (loadedRates && loadedRates[key] !== undefined ? String(loadedRates[key]) : '');
+    setSpecificNewRate(currentVal);
+  };
+
+  // Review Rate Change for Single Specific Variant
+  const handleReviewSpecificRate = (e) => {
     e.preventDefault();
     setRatesError('');
 
-    const rateKeys = [
-      { key: 'gold22k', label: '22K Gold' },
-      { key: 'gold24k', label: '24K Gold' },
-      { key: 'gold18k', label: '18K Gold' },
-      { key: 'silver925', label: '92.5% Silver' },
-      { key: 'silverPremium', label: 'Premium (Gold Coated) Silver' },
-      { key: 'silverArticles', label: 'Traditional Silver' },
-    ];
+    const val = parseFloat(specificNewRate);
+    const activeMeta = RATE_VARIANTS.find((v) => v.key === selectedRateKey);
+    if (isNaN(val) || val <= 0) {
+      setRatesError(`Please enter a valid rate (₹/gram) for ${activeMeta?.label || 'selected variant'}.`);
+      return;
+    }
 
-    for (const item of rateKeys) {
+    const hasOld = loadedRates && loadedRates[selectedRateKey] !== undefined && loadedRates[selectedRateKey] !== null && loadedRates[selectedRateKey] !== '';
+    const oldVal = hasOld ? Number(loadedRates[selectedRateKey]) : null;
+
+    if (oldVal !== null && oldVal === val) {
+      setRatesError(`No change detected. The rate is already ₹${formatPrice(val)}/g.`);
+      return;
+    }
+
+    setRateChanges([
+      {
+        key: selectedRateKey,
+        label: activeMeta?.label || selectedRateKey,
+        oldVal,
+        newVal: val,
+        diff: oldVal !== null ? val - oldVal : null,
+      },
+    ]);
+    setConfirmationOpen(true);
+  };
+
+  // Review Rate Changes for All Variants (Batch Mode)
+  const handleReviewAllRates = (e) => {
+    e.preventDefault();
+    setRatesError('');
+
+    for (const item of RATE_VARIANTS) {
       const val = parseFloat(editingRates[item.key]);
       if (isNaN(val) || val <= 0) {
         setRatesError(`Please enter a valid rate for ${item.label}.`);
@@ -165,7 +249,7 @@ export default function AdminDashboardPage() {
     }
 
     const changes = [];
-    for (const item of rateKeys) {
+    for (const item of RATE_VARIANTS) {
       const hasOld = loadedRates && loadedRates[item.key] !== undefined && loadedRates[item.key] !== null && loadedRates[item.key] !== '';
       const oldVal = hasOld ? Number(loadedRates[item.key]) : null;
       const newVal = parseFloat(editingRates[item.key]);
@@ -195,14 +279,10 @@ export default function AdminDashboardPage() {
     setRatesError('');
 
     try {
-      const payload = {
-        gold22k: parseFloat(editingRates.gold22k),
-        gold24k: parseFloat(editingRates.gold24k),
-        gold18k: parseFloat(editingRates.gold18k),
-        silver925: parseFloat(editingRates.silver925),
-        silverPremium: parseFloat(editingRates.silverPremium),
-        silverArticles: parseFloat(editingRates.silverArticles),
-      };
+      const payload = {};
+      rateChanges.forEach((c) => {
+        payload[c.key] = c.newVal;
+      });
 
       const res = await fetch('/api/gold-rates', {
         method: 'PUT',
@@ -215,9 +295,23 @@ export default function AdminDashboardPage() {
         throw new Error(data.error || 'Failed to update daily rates');
       }
 
+      if (data.rates) {
+        setLoadedRates(data.rates);
+        const synced = {};
+        RATE_VARIANTS.forEach((v) => {
+          synced[v.key] = data.rates[v.key] !== undefined ? String(data.rates[v.key]) : '';
+        });
+        setEditingRates(synced);
+        setSpecificNewRate(synced[selectedRateKey] || '');
+      }
+
       setConfirmationOpen(false);
       setRatesModalOpen(false);
-      setRatesSuccessMessage('Daily market rates updated successfully! Product prices refreshed.');
+
+      const successMsg = rateChanges.length === 1
+        ? `${rateChanges[0].label} rate updated to ₹${formatPrice(rateChanges[0].newVal)}/g! Product prices refreshed.`
+        : 'Daily market rates updated successfully! Product prices refreshed.';
+      setRatesSuccessMessage(successMsg);
 
       // Refresh product prices automatically
       await fetchProducts();
@@ -1018,11 +1112,11 @@ export default function AdminDashboardPage() {
       {/* Gold & Silver Daily Rates Modal */}
       {ratesModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-modal-backdrop">
-          <div className="bg-white rounded-2xl shadow-2xl border border-gray-100 max-w-xl w-full max-h-[92vh] flex flex-col overflow-hidden animate-modal-card">
+          <div className="bg-white rounded-2xl shadow-2xl border border-gray-100 max-w-2xl w-full max-h-[92vh] flex flex-col overflow-hidden animate-modal-card">
             {/* Modal Header */}
             <div className="p-5 sm:p-6 border-b border-gray-100 flex items-center justify-between bg-amber-50/40">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-900 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-900 flex items-center justify-center flex-shrink-0">
                   <Coins className="w-5 h-5 text-amber-800" />
                 </div>
                 <div>
@@ -1042,15 +1136,278 @@ export default function AdminDashboardPage() {
               </button>
             </div>
 
+            {/* Mode Switcher */}
+            <div className="pt-4 px-5 sm:px-6 bg-white">
+              <div className="flex items-center p-1 bg-stone-100 rounded-xl border border-stone-200/80 max-w-xs mx-auto">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setRatesMode('specific');
+                    setRatesError('');
+                  }}
+                  className={`flex-1 py-1.5 px-3 text-xs font-semibold rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                    ratesMode === 'specific'
+                      ? 'bg-white text-gray-900 shadow-xs border border-stone-200'
+                      : 'text-gray-500 hover:text-gray-900'
+                  }`}
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+                  <span>Select Specific</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setRatesMode('all');
+                    setRatesError('');
+                  }}
+                  className={`flex-1 py-1.5 px-3 text-xs font-semibold rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                    ratesMode === 'all'
+                      ? 'bg-white text-gray-900 shadow-xs border border-stone-200'
+                      : 'text-gray-500 hover:text-gray-900'
+                  }`}
+                >
+                  <Layers className="w-3.5 h-3.5 text-gray-600" />
+                  <span>Update All</span>
+                </button>
+              </div>
+            </div>
+
             {/* Modal Content */}
-            <div className="p-5 sm:p-6 overflow-y-auto space-y-6 flex-1">
+            <div className="p-5 sm:p-6 overflow-y-auto space-y-5 flex-1">
               {ratesLoading ? (
                 <div className="py-12 flex flex-col items-center justify-center gap-2">
                   <Loader2 className="w-8 h-8 text-amber-700 animate-spin" />
                   <span className="text-xs text-gray-500">Loading current market rates...</span>
                 </div>
+              ) : ratesMode === 'specific' ? (
+                /* SPECIFIC VARIANT SELECTION & EDIT MODE */
+                <form id="specific-rate-form" onSubmit={handleReviewSpecificRate} className="space-y-5">
+                  {ratesError && (
+                    <div className="p-3.5 bg-red-50 border border-red-200 text-red-700 text-xs sm:text-sm rounded-xl flex items-start gap-2.5">
+                      <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5 text-red-600" />
+                      <span>{ratesError}</span>
+                    </div>
+                  )}
+
+                  {/* Section 1: Visual Rate Selector Cards */}
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xs font-bold text-gray-700 uppercase tracking-wider font-serif">
+                        1. Select Metal Variant to Edit
+                      </span>
+                      <span className="text-[11px] text-gray-400">Click any card to select</span>
+                    </div>
+
+                    {/* Gold Rates Cards */}
+                    <div className="mb-3">
+                      <span className="text-[11px] font-bold text-amber-900/80 uppercase tracking-wider block mb-1.5">
+                        Gold Prices
+                      </span>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                        {RATE_VARIANTS.filter((v) => v.material === 'gold').map((v) => {
+                          const isSelected = selectedRateKey === v.key;
+                          const currentVal = loadedRates && loadedRates[v.key] !== undefined && loadedRates[v.key] !== null
+                            ? Number(loadedRates[v.key])
+                            : null;
+                          return (
+                            <button
+                              key={v.key}
+                              type="button"
+                              onClick={() => handleSelectVariant(v.key)}
+                              className={`p-3 rounded-xl border text-left transition-all cursor-pointer relative ${
+                                isSelected
+                                  ? 'border-amber-500 bg-amber-50/70 ring-2 ring-amber-500/50 shadow-xs'
+                                  : 'border-gray-200 bg-white hover:border-amber-300 hover:bg-stone-50/60'
+                              }`}
+                            >
+                              <div className="flex items-center justify-between mb-1">
+                                <span className="font-serif font-bold text-gray-900 text-sm">
+                                  {v.label}
+                                </span>
+                                {isSelected ? (
+                                  <span className="text-[10px] font-bold text-amber-800 bg-amber-100 px-1.5 py-0.5 rounded-md">
+                                    ✓ Active
+                                  </span>
+                                ) : (
+                                  <span className="text-[10px] text-gray-400">
+                                    {v.purityBadge}
+                                  </span>
+                                )}
+                              </div>
+                              <div className="font-mono font-bold text-base text-gray-900">
+                                {currentVal !== null ? `${formatPrice(currentVal)}/g` : 'Not set'}
+                              </div>
+                              <span className="text-[10px] text-gray-500 block truncate mt-0.5">
+                                {v.subLabel}
+                              </span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Silver Rates Cards */}
+                    <div>
+                      <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1.5">
+                        Silver Prices
+                      </span>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                        {RATE_VARIANTS.filter((v) => v.material === 'silver').map((v) => {
+                          const isSelected = selectedRateKey === v.key;
+                          const currentVal = loadedRates && loadedRates[v.key] !== undefined && loadedRates[v.key] !== null
+                            ? Number(loadedRates[v.key])
+                            : null;
+                          return (
+                            <button
+                              key={v.key}
+                              type="button"
+                              onClick={() => handleSelectVariant(v.key)}
+                              className={`p-3 rounded-xl border text-left transition-all cursor-pointer relative ${
+                                isSelected
+                                  ? 'border-amber-500 bg-amber-50/70 ring-2 ring-amber-500/50 shadow-xs'
+                                  : 'border-gray-200 bg-white hover:border-amber-300 hover:bg-stone-50/60'
+                              }`}
+                            >
+                              <div className="flex items-center justify-between mb-1">
+                                <span className="font-serif font-bold text-gray-900 text-sm">
+                                  {v.label}
+                                </span>
+                                {isSelected ? (
+                                  <span className="text-[10px] font-bold text-amber-800 bg-amber-100 px-1.5 py-0.5 rounded-md">
+                                    ✓ Active
+                                  </span>
+                                ) : (
+                                  <span className="text-[10px] text-gray-400">
+                                    {v.purityBadge}
+                                  </span>
+                                )}
+                              </div>
+                              <div className="font-mono font-bold text-base text-gray-900">
+                                {currentVal !== null ? `${formatPrice(currentVal)}/g` : 'Not set'}
+                              </div>
+                              <span className="text-[10px] text-gray-500 block truncate mt-0.5">
+                                {v.subLabel}
+                              </span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Section 2: Focused Edit Card for Selected Variant */}
+                  {(() => {
+                    const activeMeta = RATE_VARIANTS.find((v) => v.key === selectedRateKey) || RATE_VARIANTS[0];
+                    const activeCurrentVal = loadedRates && loadedRates[selectedRateKey] !== undefined && loadedRates[selectedRateKey] !== null
+                      ? Number(loadedRates[selectedRateKey])
+                      : null;
+                    const newEnteredNum = parseFloat(specificNewRate);
+                    const liveDiff = (!isNaN(newEnteredNum) && activeCurrentVal !== null)
+                      ? newEnteredNum - activeCurrentVal
+                      : null;
+
+                    return (
+                      <div className="p-4 sm:p-5 rounded-2xl bg-amber-50/50 border border-amber-200/80 space-y-4">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-amber-200/60 pb-3">
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <span className="w-2.5 h-2.5 rounded-full bg-amber-600" />
+                              <h3 className="text-sm font-bold text-gray-900 font-serif">
+                                Updating: {activeMeta.label}
+                              </h3>
+                              <span className="text-[10px] font-semibold text-amber-800 bg-amber-100/90 px-2 py-0.5 rounded-md">
+                                {activeMeta.purityBadge}
+                              </span>
+                            </div>
+                            <span className="text-[11px] text-gray-500 mt-0.5 block">
+                              {activeMeta.subLabel}
+                            </span>
+                          </div>
+
+                          <div className="flex items-center gap-1.5 self-start sm:self-center bg-white px-3 py-1.5 rounded-xl border border-amber-200/80 text-xs font-semibold text-gray-700">
+                            <span className="text-gray-400">Current:</span>
+                            <span className="font-mono text-gray-900">
+                              {activeCurrentVal !== null ? `${formatPrice(activeCurrentVal)}/g` : 'Not set'}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Input & Live Difference */}
+                        <div>
+                          <label className="block text-xs font-bold text-gray-800 mb-1.5">
+                            New Rate for {activeMeta.label} (₹ / gram) *
+                          </label>
+                          <div className="relative">
+                            <span className="absolute left-3.5 top-2.5 text-sm font-bold text-gray-400 pointer-events-none">
+                              ₹
+                            </span>
+                            <input
+                              type="number"
+                              min="1"
+                              step="1"
+                              required
+                              value={specificNewRate}
+                              onChange={(e) => {
+                                setSpecificNewRate(e.target.value);
+                                setEditingRates((prev) => ({ ...prev, [selectedRateKey]: e.target.value }));
+                              }}
+                              placeholder={activeCurrentVal ? String(activeCurrentVal) : 'Enter rate'}
+                              className="w-full pl-8 pr-14 py-2.5 bg-white border border-gray-300 rounded-xl text-base font-bold text-gray-900 focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all font-mono"
+                            />
+                            <span className="absolute right-3.5 top-3 text-xs font-medium text-gray-400 pointer-events-none">
+                              / gram
+                            </span>
+                          </div>
+
+                          {/* Live Difference Pill */}
+                          <div className="mt-2.5 min-h-[20px]">
+                            {liveDiff !== null && liveDiff !== 0 && (
+                              <div
+                                className={`inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-lg border ${
+                                  liveDiff > 0
+                                    ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                                    : 'bg-red-50 text-red-800 border-red-200'
+                                }`}
+                              >
+                                <ArrowRight className="w-3.5 h-3.5" />
+                                <span>
+                                  {liveDiff > 0 ? `+${formatPrice(liveDiff)}` : `-${formatPrice(Math.abs(liveDiff))}`} /g{' '}
+                                  ({activeCurrentVal ? `${((liveDiff / activeCurrentVal) * 100).toFixed(1)}%` : ''})
+                                </span>
+                              </div>
+                            )}
+                            {liveDiff === 0 && (
+                              <span className="text-[11px] text-gray-400 italic">
+                                Entered rate matches current saved rate.
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })()}
+
+                  {/* Metadata display */}
+                  {loadedRates?.updatedAt && (
+                    <div className="flex items-center gap-2 text-[11px] text-gray-400 pt-1">
+                      <History className="w-3.5 h-3.5" />
+                      <span>
+                        Last updated:{' '}
+                        {new Date(loadedRates.updatedAt).toLocaleDateString('en-IN', {
+                          day: 'numeric',
+                          month: 'short',
+                          year: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })}
+                        {loadedRates.updatedBy ? ` by ${loadedRates.updatedBy}` : ''}
+                      </span>
+                    </div>
+                  )}
+                </form>
               ) : (
-                <form id="rates-form" onSubmit={handleReviewRateChanges} className="space-y-6">
+                /* BATCH / ALL RATES EDIT MODE */
+                <form id="all-rates-form" onSubmit={handleReviewAllRates} className="space-y-6">
                   {ratesError && (
                     <div className="p-3.5 bg-red-50 border border-red-200 text-red-700 text-xs sm:text-sm rounded-xl flex items-start gap-2.5">
                       <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5 text-red-600" />
@@ -1071,86 +1428,33 @@ export default function AdminDashboardPage() {
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
-                      {/* 22K Gold */}
-                      <div>
-                        <label className="block text-[11px] font-semibold text-gray-700 mb-1.5">
-                          22K Gold *
-                        </label>
-                        <div className="relative">
-                          <span className="absolute left-3 top-2.5 text-xs font-semibold text-gray-400 pointer-events-none">
-                            ₹
-                          </span>
-                          <input
-                            type="number"
-                            min="1"
-                            step="1"
-                            required
-                            value={editingRates.gold22k}
-                            onChange={(e) =>
-                              setEditingRates((prev) => ({ ...prev, gold22k: e.target.value }))
-                            }
-                            placeholder="6800"
-                            className="w-full pl-7 pr-8 py-2 bg-white border border-gray-200 rounded-xl text-gray-900 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all"
-                          />
-                          <span className="absolute right-2.5 top-2.5 text-[11px] text-gray-400 pointer-events-none">
-                            /g
-                          </span>
+                      {RATE_VARIANTS.filter((v) => v.material === 'gold').map((v) => (
+                        <div key={v.key}>
+                          <label className="block text-[11px] font-semibold text-gray-700 mb-1.5">
+                            {v.label} *
+                          </label>
+                          <div className="relative">
+                            <span className="absolute left-3 top-2.5 text-xs font-semibold text-gray-400 pointer-events-none">
+                              ₹
+                            </span>
+                            <input
+                              type="number"
+                              min="1"
+                              step="1"
+                              required
+                              value={editingRates[v.key]}
+                              onChange={(e) =>
+                                setEditingRates((prev) => ({ ...prev, [v.key]: e.target.value }))
+                              }
+                              placeholder="0"
+                              className="w-full pl-7 pr-8 py-2 bg-white border border-gray-200 rounded-xl text-gray-900 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all font-mono"
+                            />
+                            <span className="absolute right-2.5 top-2.5 text-[11px] text-gray-400 pointer-events-none">
+                              /g
+                            </span>
+                          </div>
                         </div>
-                      </div>
-
-                      {/* 24K Gold */}
-                      <div>
-                        <label className="block text-[11px] font-semibold text-gray-700 mb-1.5">
-                          24K Gold *
-                        </label>
-                        <div className="relative">
-                          <span className="absolute left-3 top-2.5 text-xs font-semibold text-gray-400 pointer-events-none">
-                            ₹
-                          </span>
-                          <input
-                            type="number"
-                            min="1"
-                            step="1"
-                            required
-                            value={editingRates.gold24k}
-                            onChange={(e) =>
-                              setEditingRates((prev) => ({ ...prev, gold24k: e.target.value }))
-                            }
-                            placeholder="7400"
-                            className="w-full pl-7 pr-8 py-2 bg-white border border-gray-200 rounded-xl text-gray-900 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all"
-                          />
-                          <span className="absolute right-2.5 top-2.5 text-[11px] text-gray-400 pointer-events-none">
-                            /g
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* 18K Gold */}
-                      <div>
-                        <label className="block text-[11px] font-semibold text-gray-700 mb-1.5">
-                          18K Gold *
-                        </label>
-                        <div className="relative">
-                          <span className="absolute left-3 top-2.5 text-xs font-semibold text-gray-400 pointer-events-none">
-                            ₹
-                          </span>
-                          <input
-                            type="number"
-                            min="1"
-                            step="1"
-                            required
-                            value={editingRates.gold18k}
-                            onChange={(e) =>
-                              setEditingRates((prev) => ({ ...prev, gold18k: e.target.value }))
-                            }
-                            placeholder="5550"
-                            className="w-full pl-7 pr-8 py-2 bg-white border border-gray-200 rounded-xl text-gray-900 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all"
-                          />
-                          <span className="absolute right-2.5 top-2.5 text-[11px] text-gray-400 pointer-events-none">
-                            /g
-                          </span>
-                        </div>
-                      </div>
+                      ))}
                     </div>
                   </div>
 
@@ -1167,86 +1471,33 @@ export default function AdminDashboardPage() {
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
-                      {/* 92.5% Silver */}
-                      <div>
-                        <label className="block text-[11px] font-semibold text-gray-700 mb-1.5">
-                          92.5% Silver *
-                        </label>
-                        <div className="relative">
-                          <span className="absolute left-3 top-2.5 text-xs font-semibold text-gray-400 pointer-events-none">
-                            ₹
-                          </span>
-                          <input
-                            type="number"
-                            min="1"
-                            step="1"
-                            required
-                            value={editingRates.silver925}
-                            onChange={(e) =>
-                              setEditingRates((prev) => ({ ...prev, silver925: e.target.value }))
-                            }
-                            placeholder="95"
-                            className="w-full pl-7 pr-8 py-2 bg-white border border-gray-200 rounded-xl text-gray-900 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-slate-400 transition-all"
-                          />
-                          <span className="absolute right-2.5 top-2.5 text-[11px] text-gray-400 pointer-events-none">
-                            /g
-                          </span>
+                      {RATE_VARIANTS.filter((v) => v.material === 'silver').map((v) => (
+                        <div key={v.key}>
+                          <label className="block text-[11px] font-semibold text-gray-700 mb-1.5">
+                            {v.label} *
+                          </label>
+                          <div className="relative">
+                            <span className="absolute left-3 top-2.5 text-xs font-semibold text-gray-400 pointer-events-none">
+                              ₹
+                            </span>
+                            <input
+                              type="number"
+                              min="1"
+                              step="1"
+                              required
+                              value={editingRates[v.key]}
+                              onChange={(e) =>
+                                setEditingRates((prev) => ({ ...prev, [v.key]: e.target.value }))
+                              }
+                              placeholder="0"
+                              className="w-full pl-7 pr-8 py-2 bg-white border border-gray-200 rounded-xl text-gray-900 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-slate-400 transition-all font-mono"
+                            />
+                            <span className="absolute right-2.5 top-2.5 text-[11px] text-gray-400 pointer-events-none">
+                              /g
+                            </span>
+                          </div>
                         </div>
-                      </div>
-
-                      {/* Premium (Gold Coated) */}
-                      <div>
-                        <label className="block text-[11px] font-semibold text-gray-700 mb-1.5">
-                          Premium (Gold Coated) *
-                        </label>
-                        <div className="relative">
-                          <span className="absolute left-3 top-2.5 text-xs font-semibold text-gray-400 pointer-events-none">
-                            ₹
-                          </span>
-                          <input
-                            type="number"
-                            min="1"
-                            step="1"
-                            required
-                            value={editingRates.silverPremium}
-                            onChange={(e) =>
-                              setEditingRates((prev) => ({ ...prev, silverPremium: e.target.value }))
-                            }
-                            placeholder="110"
-                            className="w-full pl-7 pr-8 py-2 bg-white border border-gray-200 rounded-xl text-gray-900 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-slate-400 transition-all"
-                          />
-                          <span className="absolute right-2.5 top-2.5 text-[11px] text-gray-400 pointer-events-none">
-                            /g
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Traditional Silver */}
-                      <div>
-                        <label className="block text-[11px] font-semibold text-gray-700 mb-1.5">
-                          Traditional Silver *
-                        </label>
-                        <div className="relative">
-                          <span className="absolute left-3 top-2.5 text-xs font-semibold text-gray-400 pointer-events-none">
-                            ₹
-                          </span>
-                          <input
-                            type="number"
-                            min="1"
-                            step="1"
-                            required
-                            value={editingRates.silverArticles}
-                            onChange={(e) =>
-                              setEditingRates((prev) => ({ ...prev, silverArticles: e.target.value }))
-                            }
-                            placeholder="90"
-                            className="w-full pl-7 pr-8 py-2 bg-white border border-gray-200 rounded-xl text-gray-900 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-slate-400 transition-all"
-                          />
-                          <span className="absolute right-2.5 top-2.5 text-[11px] text-gray-400 pointer-events-none">
-                            /g
-                          </span>
-                        </div>
-                      </div>
+                      ))}
                     </div>
                   </div>
 
@@ -1280,14 +1531,28 @@ export default function AdminDashboardPage() {
               >
                 Cancel
               </button>
-              <button
-                type="submit"
-                form="rates-form"
-                disabled={ratesLoading}
-                className="px-5 py-2.5 bg-amber-700 hover:bg-amber-800 text-white text-xs sm:text-sm font-semibold rounded-xl shadow-md shadow-amber-800/20 transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-60"
-              >
-                <span>Save Rates</span>
-              </button>
+              {ratesMode === 'specific' ? (
+                <button
+                  type="submit"
+                  form="specific-rate-form"
+                  disabled={ratesLoading}
+                  className="px-5 py-2.5 bg-[#C8102E] hover:bg-[#A00D24] text-white text-xs sm:text-sm font-semibold rounded-xl shadow-md shadow-[#C8102E]/20 transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-60"
+                >
+                  <Sparkles className="w-4 h-4" />
+                  <span>
+                    Save {RATE_VARIANTS.find((v) => v.key === selectedRateKey)?.label || 'Rate'}
+                  </span>
+                </button>
+              ) : (
+                <button
+                  type="submit"
+                  form="all-rates-form"
+                  disabled={ratesLoading}
+                  className="px-5 py-2.5 bg-amber-700 hover:bg-amber-800 text-white text-xs sm:text-sm font-semibold rounded-xl shadow-md shadow-amber-800/20 transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-60"
+                >
+                  <span>Save All Rates</span>
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -1303,51 +1568,98 @@ export default function AdminDashboardPage() {
               </div>
               <div>
                 <h3 className="font-serif text-lg font-bold text-gray-900 leading-tight">
-                  Confirm Daily Rate Updates
+                  {rateChanges.length === 1
+                    ? `Confirm ${rateChanges[0].label} Rate Update`
+                    : 'Confirm Daily Rate Updates'}
                 </h3>
                 <p className="text-xs text-gray-500">
-                  Please review the rate changes before applying
+                  Please review the rate change before saving
                 </p>
               </div>
             </div>
 
             {/* Warning Message */}
             <div className="p-3 bg-amber-50 border border-amber-200 text-amber-900 text-xs rounded-xl mb-4 leading-relaxed">
-              <strong>Warning:</strong> Updating daily metal rates will automatically recalculate the catalogue prices for all matching products in the store and admin panel.
+              <strong>Warning:</strong> Updating daily metal rates will automatically recalculate catalogue prices for all matching products in the store and admin panel.
             </div>
 
-            {/* Rate Differences Table */}
-            <div className="border border-gray-200 rounded-xl overflow-hidden mb-5">
-              <div className="bg-gray-50 px-3.5 py-2 text-[11px] font-semibold uppercase tracking-wider text-gray-500 grid grid-cols-3">
-                <span>Metal Variant</span>
-                <span className="text-center">Current</span>
-                <span className="text-right">New Rate</span>
-              </div>
-              <div className="divide-y divide-gray-100 max-h-48 overflow-y-auto">
-                {rateChanges.map((change) => (
-                  <div key={change.key} className="px-3.5 py-2.5 text-xs grid grid-cols-3 items-center">
-                    <span className="font-medium text-gray-800">{change.label}</span>
-                    <span className="text-gray-500 text-center font-mono">
-                      {change.oldVal !== null ? `${formatPrice(change.oldVal)}/g` : 'Not set'}
+            {/* If Single Rate Changed */}
+            {rateChanges.length === 1 ? (
+              <div className="bg-amber-50/70 border border-amber-200/80 rounded-2xl p-4 mb-5">
+                <div className="flex items-center justify-between mb-2.5">
+                  <span className="font-bold text-gray-900 text-sm font-serif">
+                    {rateChanges[0].label}
+                  </span>
+                  <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-200 text-amber-900">
+                    Rate Update
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 gap-3 items-center bg-white p-3 rounded-xl border border-amber-100">
+                  <div>
+                    <span className="text-[10px] uppercase font-semibold text-gray-400 block">
+                      Current Rate
                     </span>
-                    <div className="text-right">
-                      <span className="font-bold text-gray-900 font-mono">{formatPrice(change.newVal)}/g</span>
-                      <span
-                        className={`block text-[10px] font-semibold ${
-                          change.diff === null || change.diff >= 0 ? 'text-emerald-700' : 'text-red-700'
-                        }`}
-                      >
-                        {change.diff === null
-                          ? 'New rate'
-                          : change.diff >= 0
-                          ? `+${formatPrice(change.diff)}`
-                          : `-${formatPrice(Math.abs(change.diff))}`}
-                      </span>
-                    </div>
+                    <span className="text-sm font-semibold text-gray-700 font-mono">
+                      {rateChanges[0].oldVal !== null ? `${formatPrice(rateChanges[0].oldVal)}/g` : 'Not set'}
+                    </span>
                   </div>
-                ))}
+                  <div className="text-right">
+                    <span className="text-[10px] uppercase font-semibold text-amber-800 block">
+                      New Rate
+                    </span>
+                    <span className="text-base font-bold text-gray-900 font-mono">
+                      {formatPrice(rateChanges[0].newVal)}/g
+                    </span>
+                    <span
+                      className={`block text-[11px] font-bold ${
+                        rateChanges[0].diff === null || rateChanges[0].diff >= 0
+                          ? 'text-emerald-700'
+                          : 'text-red-700'
+                      }`}
+                    >
+                      {rateChanges[0].diff === null
+                        ? 'New rate configured'
+                        : rateChanges[0].diff >= 0
+                        ? `+${formatPrice(rateChanges[0].diff)} /g`
+                        : `-${formatPrice(Math.abs(rateChanges[0].diff))} /g`}
+                    </span>
+                  </div>
+                </div>
               </div>
-            </div>
+            ) : (
+              /* If Multiple Rates Changed (Batch Mode) */
+              <div className="border border-gray-200 rounded-xl overflow-hidden mb-5">
+                <div className="bg-gray-50 px-3.5 py-2 text-[11px] font-semibold uppercase tracking-wider text-gray-500 grid grid-cols-3">
+                  <span>Metal Variant</span>
+                  <span className="text-center">Current</span>
+                  <span className="text-right">New Rate</span>
+                </div>
+                <div className="divide-y divide-gray-100 max-h-48 overflow-y-auto">
+                  {rateChanges.map((change) => (
+                    <div key={change.key} className="px-3.5 py-2.5 text-xs grid grid-cols-3 items-center">
+                      <span className="font-medium text-gray-800">{change.label}</span>
+                      <span className="text-gray-500 text-center font-mono">
+                        {change.oldVal !== null ? `${formatPrice(change.oldVal)}/g` : 'Not set'}
+                      </span>
+                      <div className="text-right">
+                        <span className="font-bold text-gray-900 font-mono">{formatPrice(change.newVal)}/g</span>
+                        <span
+                          className={`block text-[10px] font-semibold ${
+                            change.diff === null || change.diff >= 0 ? 'text-emerald-700' : 'text-red-700'
+                          }`}
+                        >
+                          {change.diff === null
+                            ? 'New rate'
+                            : change.diff >= 0
+                            ? `+${formatPrice(change.diff)}`
+                            : `-${formatPrice(Math.abs(change.diff))}`}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Confirmation Action Buttons */}
             <div className="flex items-center justify-end gap-3 pt-2">
@@ -1373,7 +1685,11 @@ export default function AdminDashboardPage() {
                 ) : (
                   <>
                     <CheckCircle2 className="w-4 h-4" />
-                    <span>Confirm & Update Rates</span>
+                    <span>
+                      {rateChanges.length === 1
+                        ? `Confirm & Update ${rateChanges[0].label}`
+                        : 'Confirm & Update Rates'}
+                    </span>
                   </>
                 )}
               </button>
