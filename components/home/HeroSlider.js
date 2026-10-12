@@ -13,7 +13,7 @@ import 'swiper/css/effect-fade';
 const slides = [
   {
     id: 1,
-    bg: 'linear-gradient(to right, rgba(41, 40, 33, 0.8), rgba(41, 40, 33, 0.2)), url("/images/hero/hero_bridal_gold_1791637796095.jpg")',
+    bg: 'linear-gradient(to right, rgba(20, 18, 15, 0.75) 0%, rgba(20, 18, 15, 0.3) 50%, rgba(20, 18, 15, 0) 100%), url("/images/hero/hero_bridal_gold.png")',
     tagline: 'Timeless Elegance',
     headline: 'Bridal Gold\nCollections',
     description: 'Discover exquisite handcrafted gold jewellery for the most special day of your life.',
@@ -24,7 +24,7 @@ const slides = [
   },
   {
     id: 2,
-    bg: 'linear-gradient(to right, rgba(41, 40, 33, 0.9), rgba(41, 40, 33, 0.3)), url("/images/hero/hero_sterling_silver_1791637808752.jpg")',
+    bg: 'linear-gradient(to right, rgba(20, 18, 15, 0.8) 0%, rgba(20, 18, 15, 0.35) 50%, rgba(20, 18, 15, 0) 100%), url("/images/hero/hero_sterling_silver.png")',
     tagline: 'Pure Craftsmanship',
     headline: 'Sterling Silver\nMasterpieces',
     description: 'Handpicked 925 sterling silver jewellery that blends tradition with contemporary design.',
@@ -35,7 +35,7 @@ const slides = [
   },
   {
     id: 3,
-    bg: 'linear-gradient(to right, rgba(41, 40, 33, 0.8), rgba(41, 40, 33, 0.2)), url("/images/hero/hero_temple_jewellery_1791637822451.jpg")',
+    bg: 'linear-gradient(to right, rgba(20, 18, 15, 0.75) 0%, rgba(20, 18, 15, 0.3) 50%, rgba(20, 18, 15, 0) 100%), url("/images/hero/hero_temple_jewellery.png")',
     tagline: 'Heritage & Tradition',
     headline: 'Temple\nJewellery',
     description: 'Sacred designs inspired by South Indian temple architecture, crafted in 22K gold.',
@@ -46,7 +46,7 @@ const slides = [
   },
   {
     id: 4,
-    bg: 'linear-gradient(to right, rgba(41, 40, 33, 0.9), rgba(41, 40, 33, 0.3)), url("/images/hero/hero_mens_collection_1791637835648.jpg")',
+    bg: 'linear-gradient(to right, rgba(20, 18, 15, 0.8) 0%, rgba(20, 18, 15, 0.35) 50%, rgba(20, 18, 15, 0) 100%), url("/images/hero/hero_mens_collection.png")',
     tagline: 'For the Modern Man',
     headline: 'Men\'s\nCollection',
     description: 'Bold rings, bracelets, chains and watches crafted for the distinguished gentleman.',
