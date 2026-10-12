@@ -3,12 +3,10 @@
 import { useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { Navigation, Pagination, Autoplay, EffectFade } from 'swiper/modules';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { Pagination, Autoplay, EffectFade } from 'swiper/modules';
 import { gsap } from 'gsap';
 
 import 'swiper/css';
-import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 import 'swiper/css/effect-fade';
 
@@ -93,7 +91,7 @@ export default function HeroSlider() {
   return (
     <section className="relative" aria-label="Featured collections">
       <Swiper
-        modules={[Navigation, Pagination, Autoplay, EffectFade]}
+        modules={[Pagination, Autoplay, EffectFade]}
         effect="fade"
         speed={800}
         loop
@@ -184,21 +182,7 @@ export default function HeroSlider() {
         ))}
       </Swiper>
 
-      {/* Custom navigation buttons */}
-      <button
-        onClick={() => swiperRef.current?.slidePrev()}
-        className="hidden md:flex absolute left-4 top-1/2 -translate-y-1/2 z-20 w-11 h-11 items-center justify-center bg-white/80 hover:bg-white text-skj-charcoal shadow-sm transition-all"
-        aria-label="Previous slide"
-      >
-        <ChevronLeft size={20} />
-      </button>
-      <button
-        onClick={() => swiperRef.current?.slideNext()}
-        className="hidden md:flex absolute right-4 top-1/2 -translate-y-1/2 z-20 w-11 h-11 items-center justify-center bg-white/80 hover:bg-white text-skj-charcoal shadow-sm transition-all"
-        aria-label="Next slide"
-      >
-        <ChevronRight size={20} />
-      </button>
+
 
       <style jsx global>{`
         .hero-swiper {
