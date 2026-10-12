@@ -142,20 +142,12 @@ export default function Navbar() {
                 className="transition-all duration-300 w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 object-contain flex-shrink-0"
                 priority
               />
-              <div className="flex flex-col">
-                <span
-                  className="font-serif font-bold text-skj-charcoal text-sm sm:text-base lg:text-lg xl:text-xl leading-tight tracking-tight group-hover:text-skj-olive transition-colors whitespace-nowrap"
-                  style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
-                >
-                  Sri Kankatala Jewellers
-                </span>
-                <span
-                  className="hidden sm:inline-block text-[9px] lg:text-[10px] uppercase tracking-[0.2em] font-semibold text-[#8B0000] mt-0.5"
-                  style={{ fontFamily: "'Inter', sans-serif" }}
-                >
-                  Heritage &bull; Purity &bull; Craft
-                </span>
-              </div>
+              <span
+                className="font-serif font-bold text-skj-charcoal text-base sm:text-lg lg:text-xl tracking-tight group-hover:text-skj-olive transition-colors whitespace-nowrap"
+                style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+              >
+                Sri Kankatala Jewellers
+              </span>
             </Link>
 
             {/* Desktop navigation links */}
@@ -277,17 +269,12 @@ export default function Navbar() {
                   height={40}
                   className="w-10 h-10 object-contain flex-shrink-0"
                 />
-                <div className="flex flex-col">
-                  <span
-                    className="font-serif font-bold text-skj-charcoal text-sm leading-tight"
-                    style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
-                  >
-                    Sri Kankatala Jewellers
-                  </span>
-                  <span className="text-[9px] uppercase tracking-wider font-semibold text-[#8B0000]">
-                    Ravulapalem
-                  </span>
-                </div>
+                <span
+                  className="font-serif font-bold text-skj-charcoal text-base leading-tight"
+                  style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                >
+                  Sri Kankatala Jewellers
+                </span>
               </div>
               <button
                 onClick={() => setMobileOpen(false)}
