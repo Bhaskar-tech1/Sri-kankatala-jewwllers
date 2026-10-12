@@ -128,20 +128,34 @@ export default function Navbar() {
           <div className={`flex items-center justify-between transition-all duration-300 ${
             scrolled ? 'py-2' : 'py-3 lg:py-4'
           }`}>
-            {/* Logo */}
+            {/* Logo & Brand Name */}
             <Link
               href="/"
-              className="flex-shrink-0 relative"
+              className="flex items-center gap-2.5 sm:gap-3.5 flex-shrink-0 group"
               aria-label="Sri Kankatala Jewellers — Home"
             >
               <Image
                 src="/SKJlogo.png"
                 alt="Sri Kankatala Jewellers Logo"
-                width={scrolled ? 52 : 64}
-                height={scrolled ? 52 : 64}
-                className="transition-all duration-300 w-12 h-12 lg:w-16 lg:h-16 object-contain"
+                width={scrolled ? 48 : 60}
+                height={scrolled ? 48 : 60}
+                className="transition-all duration-300 w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 object-contain flex-shrink-0"
                 priority
               />
+              <div className="flex flex-col">
+                <span
+                  className="font-serif font-bold text-skj-charcoal text-sm sm:text-base lg:text-lg xl:text-xl leading-tight tracking-tight group-hover:text-skj-olive transition-colors whitespace-nowrap"
+                  style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                >
+                  Sri Kankatala Jewellers
+                </span>
+                <span
+                  className="hidden sm:inline-block text-[9px] lg:text-[10px] uppercase tracking-[0.2em] font-semibold text-[#8B0000] mt-0.5"
+                  style={{ fontFamily: "'Inter', sans-serif" }}
+                >
+                  Heritage &bull; Purity &bull; Craft
+                </span>
+              </div>
             </Link>
 
             {/* Desktop navigation links */}
@@ -255,12 +269,26 @@ export default function Navbar() {
           >
             {/* Drawer header */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-skj-border">
-              <Image
-                src="/SKJlogo.png"
-                alt="SKJ"
-                width={40}
-                height={40}
-              />
+              <div className="flex items-center gap-2.5">
+                <Image
+                  src="/SKJlogo.png"
+                  alt="Sri Kankatala Jewellers"
+                  width={40}
+                  height={40}
+                  className="w-10 h-10 object-contain flex-shrink-0"
+                />
+                <div className="flex flex-col">
+                  <span
+                    className="font-serif font-bold text-skj-charcoal text-sm leading-tight"
+                    style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                  >
+                    Sri Kankatala Jewellers
+                  </span>
+                  <span className="text-[9px] uppercase tracking-wider font-semibold text-[#8B0000]">
+                    Ravulapalem
+                  </span>
+                </div>
+              </div>
               <button
                 onClick={() => setMobileOpen(false)}
                 className="p-1 text-skj-charcoal"
