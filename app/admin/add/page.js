@@ -110,7 +110,7 @@ export default function AddProductPage() {
     if (material === 'gold') {
       setPurity('22K');
     } else {
-      setPurity('92.5 Sterling');
+      setPurity('92.5%');
     }
   }, [material]);
 
@@ -323,10 +323,10 @@ export default function AddProductPage() {
                 <select
                   value={material}
                   onChange={(e) => setMaterial(e.target.value)}
-                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#8B0000] focus:bg-white transition-all"
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#8B0000] focus:bg-white transition-all cursor-pointer"
                 >
-                  <option value="gold">Gold (Yellow / Antique / Temple)</option>
-                  <option value="silver">Silver (92.5 Sterling / Pure)</option>
+                  <option value="gold">Gold</option>
+                  <option value="silver">Silver</option>
                 </select>
               </div>
 
@@ -337,10 +337,10 @@ export default function AddProductPage() {
                 <select
                   value={audience}
                   onChange={(e) => setAudience(e.target.value)}
-                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#8B0000] focus:bg-white transition-all"
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#8B0000] focus:bg-white transition-all cursor-pointer"
                 >
-                  <option value="women">Women Collection</option>
-                  <option value="men">Men Collection</option>
+                  <option value="women">Women</option>
+                  <option value="men">Men</option>
                 </select>
               </div>
             </div>
@@ -385,21 +385,21 @@ export default function AddProductPage() {
                   <select
                     value={purity}
                     onChange={(e) => setPurity(e.target.value)}
-                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#8B0000] focus:bg-white transition-all"
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#8B0000] focus:bg-white transition-all cursor-pointer"
                   >
-                    <option value="22K">22K (916 BIS Hallmark)</option>
-                    <option value="24K">24K (Pure Gold)</option>
-                    <option value="18K">18K (Diamond / Designer)</option>
+                    <option value="22K">22K</option>
+                    <option value="24K">24K</option>
+                    <option value="18K">18K</option>
                   </select>
                 ) : (
                   <select
                     value={purity}
                     onChange={(e) => setPurity(e.target.value)}
-                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#8B0000] focus:bg-white transition-all"
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#8B0000] focus:bg-white transition-all cursor-pointer"
                   >
-                    <option value="92.5 Sterling">92.5% Sterling Silver</option>
-                    <option value="99.9 Pure Silver">99.9% Pure Silver (Pooja Articles)</option>
-                    <option value="Silver Articles">Traditional Silver</option>
+                    <option value="92.5%">92.5%</option>
+                    <option value="Premium (Gold Coated)">Premium (Gold Coated)</option>
+                    <option value="Traditional Silver">Traditional Silver</option>
                   </select>
                 )}
               </div>
