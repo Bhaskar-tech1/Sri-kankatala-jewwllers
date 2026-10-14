@@ -31,7 +31,7 @@ export default function WhySKJ() {
       <div className="section-container">
         <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
           {/* Left: Editorial content */}
-            <div data-aos="fade-right" className="pr-0 lg:pr-8">
+          <div data-aos="fade-up" className="pr-0 lg:pr-8">
             <p
               className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.25em] text-skj-gold mb-4"
               style={{ fontFamily: 'Inter, system-ui, sans-serif' }}
@@ -85,7 +85,7 @@ export default function WhySKJ() {
           </div>
 
           {/* Right: Value propositions */}
-          <div className="grid sm:grid-cols-2 gap-x-6 gap-y-10 lg:gap-y-12" data-aos="fade-left">
+          <div className="grid sm:grid-cols-2 gap-x-6 gap-y-10 lg:gap-y-12" data-aos="fade-up">
             {values.map((item, index) => {
               const Icon = item.icon;
               return (

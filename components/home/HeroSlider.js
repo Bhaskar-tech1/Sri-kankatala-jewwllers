@@ -93,7 +93,7 @@ export default function HeroSlider() {
   }, []);
 
   return (
-    <section className="relative" aria-label="Featured collections">
+    <section className="relative overflow-hidden" aria-label="Featured collections">
       <Swiper
         modules={[Pagination, Autoplay, EffectFade]}
         effect="fade"

@@ -131,7 +131,7 @@ export default function Navbar() {
             {/* Logo & Brand Name */}
             <Link
               href="/"
-              className="flex items-center gap-2.5 sm:gap-3.5 flex-shrink-0 group"
+              className="flex items-center gap-2 sm:gap-3.5 flex-shrink min-w-0 group"
               aria-label="Sri Kankatala Jewellers — Home"
             >
               <Image
@@ -143,7 +143,7 @@ export default function Navbar() {
                 priority
               />
               <span
-                className="font-serif font-bold text-skj-charcoal text-base sm:text-lg lg:text-xl tracking-tight group-hover:text-skj-olive transition-colors whitespace-nowrap"
+                className="font-serif font-bold text-skj-charcoal text-[15px] sm:text-lg lg:text-xl tracking-tight group-hover:text-skj-olive transition-colors whitespace-nowrap truncate"
                 style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
               >
                 Sri Kankatala Jewellers
@@ -213,7 +213,7 @@ export default function Navbar() {
             </ul>
 
             {/* Right actions: Cart, Mobile menu */}
-            <div className="flex items-center gap-2 lg:gap-3">
+            <div className="flex items-center gap-1.5 sm:gap-2 lg:gap-3 flex-shrink-0">
               {/* Cart */}
               <Link
                 href="/cart"

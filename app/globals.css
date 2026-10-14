@@ -34,6 +34,8 @@ html {
   scroll-behavior: smooth;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow-x: clip;
+  max-width: 100vw;
 }
 
 body {
@@ -42,7 +44,9 @@ body {
   color: #292821;
   font-family: 'Inter', system-ui, sans-serif;
   line-height: 1.6;
-  overflow-x: hidden;
+  overflow-x: clip;
+  max-width: 100vw;
+  width: 100%;
 }
 
 /* Reduced motion preferences */
@@ -61,6 +65,7 @@ body {
 /* ═══════════════════════════════════════════════════
    Silk-Smooth Luxury AOS Scroll Animations
    Replaces default 100px jump with buttery 24px glide
+   Prevents mobile screen horizontal blowout
    ═══════════════════════════════════════════════════ */
 [data-aos] {
   backface-visibility: hidden;
@@ -68,14 +73,18 @@ body {
   will-change: transform, opacity;
 }
 
-[data-aos="fade-up"] {
+[data-aos="fade-up"],
+[data-aos="fade-left"],
+[data-aos="fade-right"] {
   transform: translate3d(0, 24px, 0) !important;
   opacity: 0;
   transition-property: transform, opacity !important;
   transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
-[data-aos="fade-up"].aos-animate {
+[data-aos="fade-up"].aos-animate,
+[data-aos="fade-left"].aos-animate,
+[data-aos="fade-right"].aos-animate {
   transform: translate3d(0, 0, 0) !important;
   opacity: 1;
 }
