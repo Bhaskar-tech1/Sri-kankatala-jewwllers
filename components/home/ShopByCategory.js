@@ -54,8 +54,8 @@ export default function ShopByCategory() {
         </div>
 
         {/* Category grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-          {featuredCategories.map((cat, index) => {
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6" data-aos="fade-up">
+          {featuredCategories.map((cat) => {
             const route = categoryRouteMap[cat.name] || '/gold/women';
             const href = `${route}?category=${encodeURIComponent(cat.name)}`;
 
@@ -64,8 +64,6 @@ export default function ShopByCategory() {
                 key={cat.slug}
                 href={href}
                 className="group relative block"
-                data-aos="fade-up"
-                data-aos-delay={index * 60}
               >
                 <div className="relative aspect-square overflow-hidden rounded-full bg-gradient-to-br from-skj-ivory to-skj-border/60 shadow-lg hover:shadow-2xl ring-4 ring-white transition-all duration-300">
                   {/* Category Image */}
@@ -74,6 +72,7 @@ export default function ShopByCategory() {
                       src={categoryImages[cat.name]}
                       alt={cat.name}
                       fill
+                      priority
                       className="object-cover group-hover:scale-105 transition-transform duration-700"
                       sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
                     />
