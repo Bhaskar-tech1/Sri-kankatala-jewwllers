@@ -3,7 +3,10 @@ import Link from 'next/link';
 
 export const metadata = {
   title: 'Privacy Policy | Sri Kankatala Jewellers',
-  description: 'Privacy Policy for Sri Kankatala Jewellers.',
+  description: 'Privacy Policy for Sri Kankatala Jewellers, Ravulapalem.',
+  alternates: {
+    canonical: '/privacy-policy',
+  },
 };
 
 export default function PrivacyPolicyPage() {

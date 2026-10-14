@@ -2,9 +2,19 @@ import { Suspense } from 'react';
 import CatalogueView from '@/components/catalogue/CatalogueView';
 
 export const metadata = {
-  title: 'Gold Jewellery for Women',
+  title: 'Gold Jewellery for Women in Ravulapalem',
   description:
-    'Browse our exquisite collection of gold jewellery for women — necklaces, harams, earrings, jhumkas, bangles, rings, pendants and more at Sri Kankatala Jewellers.',
+    'Browse our exquisite collection of 22K gold jewellery for women in Ravulapalem — bridal necklaces, harams, earrings, jhumkas, bangles, and rings at Sri Kankatala Jewellers.',
+  alternates: {
+    canonical: '/gold/women',
+  },
+  openGraph: {
+    title: 'Gold Jewellery for Women in Ravulapalem | Sri Kankatala Jewellers',
+    description:
+      'Browse our exquisite collection of 22K gold jewellery for women in Ravulapalem — bridal necklaces, harams, earrings, jhumkas, bangles, and rings at Sri Kankatala Jewellers.',
+    url: '/gold/women',
+    type: 'website',
+  },
 };
 
 export default function GoldWomenPage() {

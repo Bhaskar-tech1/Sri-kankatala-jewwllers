@@ -56,7 +56,7 @@ export default function ContactClient() {
               
               <div className="relative z-10">
                 <h2 className="text-3xl lg:text-4xl font-semibold mb-3" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>Get in Touch</h2>
-                <p className="text-skj-charcoal/80 text-sm mb-12 leading-relaxed">Whether you're looking for bridal jewellery or need assistance with our collections, our family is here to help.</p>
+                <p className="text-skj-charcoal/80 text-sm mb-12 leading-relaxed">Whether you&apos;re looking for bridal jewellery or need assistance with our collections, our family is here to help.</p>
                 
                 <div className="space-y-8">
                   <div className="flex gap-5 items-start">
@@ -157,7 +157,7 @@ export default function ContactClient() {
                       <option value="Bridal Jewellery">Bridal Jewellery</option>
                       <option value="Gold Necklaces">Gold Necklaces</option>
                       <option value="Silver Collections">Silver Collections</option>
-                      <option value="Men's Jewellery">Men's Jewellery</option>
+                      <option value="Men's Jewellery">Men&apos;s Jewellery</option>
                       <option value="Other">Other Enquiry</option>
                     </select>
                   </div>

@@ -2,9 +2,19 @@ import { Suspense } from 'react';
 import CatalogueView from '@/components/catalogue/CatalogueView';
 
 export const metadata = {
-  title: 'Silver Jewellery for Women',
+  title: 'Silver Jewellery for Women in Ravulapalem',
   description:
-    'Discover beautiful sterling silver jewellery for women — necklaces, jhumkas, bangles, rings, anklets and more at Sri Kankatala Jewellers.',
+    'Discover genuine 925 sterling silver jewellery for women in Ravulapalem — anklets, jhumkas, bangles, rings, and necklaces at Sri Kankatala Jewellers.',
+  alternates: {
+    canonical: '/silver/women',
+  },
+  openGraph: {
+    title: 'Silver Jewellery for Women in Ravulapalem | Sri Kankatala Jewellers',
+    description:
+      'Discover genuine 925 sterling silver jewellery for women in Ravulapalem — anklets, jhumkas, bangles, rings, and necklaces at Sri Kankatala Jewellers.',
+    url: '/silver/women',
+    type: 'website',
+  },
 };
 
 export default function SilverWomenPage() {

@@ -146,7 +146,7 @@ export default function CatalogueView({ material, audience }) {
   const pageTitle = `${materialLabel} Jewellery for ${audienceLabel}`;
 
   // Shared filter panel content
-  const FilterContent = () => (
+  const filterContent = (
     <div className="bg-white rounded-2xl shadow-sm border border-skj-border/60 p-6 space-y-8 max-h-[calc(100vh-140px)] overflow-y-auto custom-scrollbar">
       {/* Categories */}
       <div>
@@ -405,7 +405,7 @@ export default function CatalogueView({ material, audience }) {
               >
                 Filters
               </h2>
-              <FilterContent />
+              {filterContent}
             </div>
           </aside>
 
@@ -468,7 +468,7 @@ export default function CatalogueView({ material, audience }) {
               </button>
             </div>
             <div className="p-5">
-              <FilterContent />
+              {filterContent}
             </div>
             <div className="sticky bottom-0 bg-white border-t border-skj-border p-4">
               <button

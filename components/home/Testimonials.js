@@ -123,7 +123,7 @@ export default function Testimonials() {
 
                   {/* Review Text */}
                   <p className="text-xs sm:text-sm text-skj-charcoal leading-relaxed flex-grow">
-                    "{t.text}"
+                    &ldquo;{t.text}&rdquo;
                   </p>
                 </div>
               </SwiperSlide>

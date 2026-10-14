@@ -2,9 +2,19 @@ import { Suspense } from 'react';
 import CatalogueView from '@/components/catalogue/CatalogueView';
 
 export const metadata = {
-  title: 'Gold Jewellery for Men',
+  title: 'Gold Jewellery for Men in Ravulapalem',
   description:
-    'Explore premium gold jewellery for men — rings, bracelets, chains, pendants and watches at Sri Kankatala Jewellers.',
+    'Explore premium 22K gold jewellery for men in Ravulapalem — rings, bracelets, chains, and kadas at Sri Kankatala Jewellers.',
+  alternates: {
+    canonical: '/gold/men',
+  },
+  openGraph: {
+    title: 'Gold Jewellery for Men in Ravulapalem | Sri Kankatala Jewellers',
+    description:
+      'Explore premium 22K gold jewellery for men in Ravulapalem — rings, bracelets, chains, and kadas at Sri Kankatala Jewellers.',
+    url: '/gold/men',
+    type: 'website',
+  },
 };
 
 export default function GoldMenPage() {

@@ -2,9 +2,19 @@ import { Suspense } from 'react';
 import CatalogueView from '@/components/catalogue/CatalogueView';
 
 export const metadata = {
-  title: 'Silver Jewellery for Men',
+  title: 'Silver Jewellery for Men in Ravulapalem',
   description:
-    'Shop premium sterling silver jewellery for men — rings, bracelets, chains, pendants and watches at Sri Kankatala Jewellers.',
+    'Shop premium 925 sterling silver jewellery for men in Ravulapalem — rings, bracelets, chains, and kadas at Sri Kankatala Jewellers.',
+  alternates: {
+    canonical: '/silver/men',
+  },
+  openGraph: {
+    title: 'Silver Jewellery for Men in Ravulapalem | Sri Kankatala Jewellers',
+    description:
+      'Shop premium 925 sterling silver jewellery for men in Ravulapalem — rings, bracelets, chains, and kadas at Sri Kankatala Jewellers.',
+    url: '/silver/men',
+    type: 'website',
+  },
 };
 
 export default function SilverMenPage() {

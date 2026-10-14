@@ -5,7 +5,17 @@ import { MapPin, ArrowRight } from 'lucide-react';
 export const metadata = {
   title: 'About Sri Kankatala Jewellers | Ravulapalem',
   description:
-    'Discover Sri Kankatala Jewellers in Ravulapalem, Andhra Pradesh. Explore our jewellery collections and learn more about our brand.',
+    'Discover Sri Kankatala Jewellers in Ravulapalem, Andhra Pradesh. Trusted destination for 100% hallmark-certified 22K gold and 925 sterling silver jewellery.',
+  alternates: {
+    canonical: '/about',
+  },
+  openGraph: {
+    title: 'About Sri Kankatala Jewellers | Ravulapalem',
+    description:
+      'Discover Sri Kankatala Jewellers in Ravulapalem, Andhra Pradesh. Trusted destination for 100% hallmark-certified 22K gold and 925 sterling silver jewellery.',
+    url: '/about',
+    type: 'website',
+  },
 };
 
 export default function AboutPage() {
