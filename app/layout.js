@@ -75,6 +75,9 @@ export const metadata = {
       'max-snippet': -1,
     },
   },
+  verification: {
+    google: 'ObRywB_1-I8exnp0_AvHguXbvxF2g00WCGBqN6oiYQU',
+  },
 };
 
 import JsonLd from '@/components/seo/JsonLd';
