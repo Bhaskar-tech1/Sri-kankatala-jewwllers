@@ -54,7 +54,7 @@ export default function ShopByCategory() {
         </div>
 
         {/* Category grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6" data-aos="fade-up">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
           {featuredCategories.map((cat) => {
             const route = categoryRouteMap[cat.name] || '/gold/women';
             const href = `${route}?category=${encodeURIComponent(cat.name)}`;
