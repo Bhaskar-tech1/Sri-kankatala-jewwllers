@@ -3,7 +3,7 @@ import { db } from '@/lib/firebase';
 import { collection, getDocs, query } from 'firebase/firestore';
 
 export default async function sitemap() {
-  const baseUrl = siteConfig.siteUrl || 'https://srikankatalajewellers.in';
+  const baseUrl = siteConfig.siteUrl || 'https://www.srikankatalajewellers.in';
 
   // Core static canonical pages
   const staticRoutes = [

@@ -17,7 +17,7 @@ export const metadata = {
     title: 'Sri Kankatala Jewellers | Gold & Silver Jewellery in Ravulapalem',
     description:
       'Explore gold, silver and bridal jewellery at Sri Kankatala Jewellers in Ravulapalem, Andhra Pradesh. Browse our curated collections of necklaces, bangles, harams, and rings.',
-    url: 'https://srikankatalajewellers.in',
+    url: 'https://www.srikankatalajewellers.in',
     type: 'website',
   },
 };

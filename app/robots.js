@@ -1,7 +1,7 @@
 import siteConfig from '@/lib/config';
 
 export default function robots() {
-  const baseUrl = siteConfig.siteUrl || 'https://srikankatalajewellers.in';
+  const baseUrl = siteConfig.siteUrl || 'https://www.srikankatalajewellers.in';
 
   return {
     rules: [
