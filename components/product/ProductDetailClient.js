@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import {
   ShoppingBag, Check, Minus, Plus, Heart, Share2, Truck,
-  Shield, RefreshCw,
+  Shield,
 } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { formatPrice, formatWeight, capitalize } from '@/lib/utils';
@@ -191,7 +191,7 @@ export default function ProductDetailClient({ product }) {
             )}
 
             {/* Trust badges */}
-            <div className="grid grid-cols-3 gap-3 pt-4 border-t border-skj-border">
+            <div className="grid grid-cols-2 gap-3 pt-4 border-t border-skj-border">
               <div className="flex flex-col items-center text-center p-3">
                 <Shield size={18} className="text-skj-olive mb-1.5" />
                 <p className="text-[10px] text-skj-muted leading-tight">Hallmark Certified</p>
@@ -199,10 +199,6 @@ export default function ProductDetailClient({ product }) {
               <div className="flex flex-col items-center text-center p-3">
                 <Truck size={18} className="text-skj-olive mb-1.5" />
                 <p className="text-[10px] text-skj-muted leading-tight">Secure Packaging</p>
-              </div>
-              <div className="flex flex-col items-center text-center p-3">
-                <RefreshCw size={18} className="text-skj-olive mb-1.5" />
-                <p className="text-[10px] text-skj-muted leading-tight">Easy Exchange</p>
               </div>
             </div>
           </div>
