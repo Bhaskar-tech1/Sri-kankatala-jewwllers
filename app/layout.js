@@ -21,6 +21,14 @@ export const metadata = {
     'earrings',
     'wedding jewellery',
   ],
+  icons: {
+    icon: [
+      { url: '/SKJlogo.png' },
+      { url: '/icon.png' },
+    ],
+    shortcut: '/SKJlogo.png',
+    apple: '/SKJlogo.png',
+  },
   openGraph: {
     title: siteConfig.businessName,
     description: siteConfig.description,

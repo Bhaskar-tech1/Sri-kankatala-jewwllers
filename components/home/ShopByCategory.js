@@ -55,7 +55,7 @@ export default function ShopByCategory() {
 
         {/* Category grid */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-          {featuredCategories.map((cat) => {
+          {featuredCategories.map((cat, index) => {
             const route = categoryRouteMap[cat.name] || '/gold/women';
             const href = `${route}?category=${encodeURIComponent(cat.name)}`;
 
@@ -63,7 +63,10 @@ export default function ShopByCategory() {
               <Link
                 key={cat.slug}
                 href={href}
-                className="group relative block"
+                className="group relative block transform-gpu"
+                data-aos="fade-up"
+                data-aos-delay={(index % 4) * 45}
+                data-aos-duration="750"
               >
                 <div className="relative aspect-square overflow-hidden rounded-full bg-gradient-to-br from-skj-ivory to-skj-border/60 shadow-lg hover:shadow-2xl ring-4 ring-white transition-all duration-300">
                   {/* Category Image */}

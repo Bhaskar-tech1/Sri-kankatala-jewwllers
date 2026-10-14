@@ -10,7 +10,7 @@
   /* SKJ Brand Colours */
   --color-skj-red: #FD0100;
   --color-skj-olive: #5F5F01;
-  --color-skj-deep-olive: #343500;
+  --color-skj-deep-olive: #3B4210;
   --color-skj-gold: #C9A34A;
   --color-skj-ivory: #FFF9EC;
   --color-skj-charcoal: #292821;
@@ -56,6 +56,28 @@ body {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* ═══════════════════════════════════════════════════
+   Silk-Smooth Luxury AOS Scroll Animations
+   Replaces default 100px jump with buttery 24px glide
+   ═══════════════════════════════════════════════════ */
+[data-aos] {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  will-change: transform, opacity;
+}
+
+[data-aos="fade-up"] {
+  transform: translate3d(0, 24px, 0) !important;
+  opacity: 0;
+  transition-property: transform, opacity !important;
+  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+[data-aos="fade-up"].aos-animate {
+  transform: translate3d(0, 0, 0) !important;
+  opacity: 1;
 }
 
 /* Typography */

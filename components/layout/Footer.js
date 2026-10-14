@@ -37,7 +37,7 @@ export default function Footer() {
   }
 
   return (
-    <footer className="bg-skj-deep-olive text-white/90" role="contentinfo">
+    <footer className="bg-[#3B4210] text-white/90" role="contentinfo">
       {/* Main footer content */}
       <div className="section-container py-8 lg:py-10">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-6">

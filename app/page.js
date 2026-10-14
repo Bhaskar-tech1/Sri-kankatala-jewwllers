@@ -13,15 +13,20 @@ import Testimonials from '@/components/home/Testimonials';
 export default function HomePage() {
   useEffect(() => {
     AOS.init({
-      duration: 700,
+      duration: 750,
       easing: 'ease-out-cubic',
       once: true,
-      offset: 60,
+      offset: 40,
       disable: () =>
         window.matchMedia('(prefers-reduced-motion: reduce)').matches,
     });
 
+    const timer = setTimeout(() => {
+      AOS.refresh();
+    }, 300);
+
     return () => {
+      clearTimeout(timer);
       AOS.refresh();
     };
   }, []);

@@ -14,6 +14,7 @@ const slides = [
   {
     id: 1,
     bg: 'linear-gradient(to right, rgba(20, 18, 15, 0.75) 0%, rgba(20, 18, 15, 0.3) 50%, rgba(20, 18, 15, 0) 100%), url("/images/hero/hero_bridal_gold.png")',
+    bgMobile: 'linear-gradient(to top, rgba(20, 18, 15, 0.9) 0%, rgba(20, 18, 15, 0.45) 50%, rgba(20, 18, 15, 0.6) 100%), url("/images/hero/hero_bridal_gold_mobile.png")',
     tagline: 'Timeless Elegance',
     headline: 'Bridal Gold\nCollections',
     description: 'Discover exquisite handcrafted gold jewellery for the most special day of your life.',
@@ -25,6 +26,7 @@ const slides = [
   {
     id: 2,
     bg: 'linear-gradient(to right, rgba(20, 18, 15, 0.8) 0%, rgba(20, 18, 15, 0.35) 50%, rgba(20, 18, 15, 0) 100%), url("/images/hero/hero_sterling_silver.png")',
+    bgMobile: 'linear-gradient(to top, rgba(20, 18, 15, 0.9) 0%, rgba(20, 18, 15, 0.45) 50%, rgba(20, 18, 15, 0.6) 100%), url("/images/hero/hero_sterling_silver_mobile.png")',
     tagline: 'Pure Craftsmanship',
     headline: 'Sterling Silver\nMasterpieces',
     description: 'Handpicked 925 sterling silver jewellery that blends tradition with contemporary design.',
@@ -36,6 +38,7 @@ const slides = [
   {
     id: 3,
     bg: 'linear-gradient(to right, rgba(20, 18, 15, 0.75) 0%, rgba(20, 18, 15, 0.3) 50%, rgba(20, 18, 15, 0) 100%), url("/images/hero/hero_temple_jewellery.png")',
+    bgMobile: 'linear-gradient(to top, rgba(20, 18, 15, 0.9) 0%, rgba(20, 18, 15, 0.45) 50%, rgba(20, 18, 15, 0.6) 100%), url("/images/hero/hero_temple_jewellery_mobile.png")',
     tagline: 'Heritage & Tradition',
     headline: 'Temple\nJewellery',
     description: 'Sacred designs inspired by South Indian temple architecture, crafted in 22K gold.',
@@ -47,6 +50,7 @@ const slides = [
   {
     id: 4,
     bg: 'linear-gradient(to right, rgba(20, 18, 15, 0.8) 0%, rgba(20, 18, 15, 0.35) 50%, rgba(20, 18, 15, 0) 100%), url("/images/hero/hero_mens_collection.png")',
+    bgMobile: 'linear-gradient(to top, rgba(20, 18, 15, 0.9) 0%, rgba(20, 18, 15, 0.45) 50%, rgba(20, 18, 15, 0.6) 100%), url("/images/hero/hero_mens_collection_mobile.png")',
     tagline: 'For the Modern Man',
     headline: 'Men\'s\nCollection',
     description: 'Bold rings, bracelets, chains and watches crafted for the distinguished gentleman.',
@@ -93,12 +97,14 @@ export default function HeroSlider() {
       <Swiper
         modules={[Pagination, Autoplay, EffectFade]}
         effect="fade"
+        fadeEffect={{ crossFade: true }}
         speed={800}
         loop
         autoplay={{
-          delay: 5000,
+          delay: 3000,
           disableOnInteraction: false,
-          pauseOnMouseEnter: true,
+          pauseOnMouseEnter: false,
+          waitForTransition: false,
         }}
         pagination={{
           clickable: true,
@@ -113,10 +119,19 @@ export default function HeroSlider() {
       >
         {slides.map((slide, index) => (
           <SwiperSlide key={slide.id}>
-            <div
-              className="relative flex items-center min-h-[480px] sm:min-h-[540px] md:min-h-[580px] lg:min-h-[660px] text-white"
-              style={{ backgroundImage: slide.bg, backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}
-            >
+            <div className="relative flex items-center min-h-[580px] sm:min-h-[540px] md:min-h-[580px] lg:min-h-[660px] text-white overflow-hidden">
+              {/* Desktop background */}
+              <div
+                className="hidden sm:block absolute inset-0 bg-cover bg-center bg-no-repeat"
+                style={{ backgroundImage: slide.bg }}
+                aria-hidden="true"
+              />
+              {/* Mobile background */}
+              <div
+                className="block sm:hidden absolute inset-0 bg-cover bg-center bg-no-repeat"
+                style={{ backgroundImage: slide.bgMobile }}
+                aria-hidden="true"
+              />
               {/* Decorative pattern overlay */}
               <div
                 className="absolute inset-0 opacity-[0.03]"
@@ -150,7 +165,7 @@ export default function HeroSlider() {
 
                   {/* Description */}
                   <p
-                    className="text-sm sm:text-base leading-relaxed mb-6 max-w-md text-white/80"
+                    className="text-sm sm:text-base leading-relaxed mb-6 max-w-[230px] sm:max-w-md text-white/80"
                     style={{ fontFamily: 'Inter, system-ui, sans-serif' }}
                   >
                     {slide.description}
