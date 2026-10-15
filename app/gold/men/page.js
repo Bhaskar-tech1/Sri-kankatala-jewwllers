@@ -1,5 +1,7 @@
 import { Suspense } from 'react';
 import CatalogueView from '@/components/catalogue/CatalogueView';
+import JsonLd from '@/components/seo/JsonLd';
+import siteConfig from '@/lib/config';
 
 export const metadata = {
   title: 'Gold Jewellery for Men in Ravulapalem',
@@ -17,11 +19,39 @@ export const metadata = {
   },
 };
 
+const breadcrumbs = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    {
+      '@type': 'ListItem',
+      position: 1,
+      name: 'Home',
+      item: siteConfig.siteUrl,
+    },
+    {
+      '@type': 'ListItem',
+      position: 2,
+      name: 'Gold Jewellery',
+      item: `${siteConfig.siteUrl}/gold/men`,
+    },
+    {
+      '@type': 'ListItem',
+      position: 3,
+      name: 'Men',
+      item: `${siteConfig.siteUrl}/gold/men`,
+    },
+  ],
+};
+
 export default function GoldMenPage() {
   return (
-    <Suspense fallback={<CatalogueLoading />}>
-      <CatalogueView material="gold" audience="men" />
-    </Suspense>
+    <>
+      <JsonLd data={breadcrumbs} />
+      <Suspense fallback={<CatalogueLoading />}>
+        <CatalogueView material="gold" audience="men" />
+      </Suspense>
+    </>
   );
 }
 

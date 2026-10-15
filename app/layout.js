@@ -87,12 +87,19 @@ const storeSchema = {
   '@type': 'JewelryStore',
   '@id': `${siteConfig.siteUrl}/#jewelrystore`,
   name: siteConfig.businessName,
+  alternateName: ['SKJ', 'Sri Kankatala Jewellers Ravulapalem', 'Sri Kankatala Jewellery', 'Sri Kankatala Jewellers Official Website'],
   url: siteConfig.siteUrl,
   logo: 'https://res.cloudinary.com/i8sv3vs8/image/upload/f_auto,q_auto/v1792040219/skj/SKJlogo.png',
-  image: 'https://res.cloudinary.com/i8sv3vs8/image/upload/f_auto,q_auto/v1792040219/skj/SKJlogo.png',
+  image: [
+    'https://res.cloudinary.com/i8sv3vs8/image/upload/f_auto,q_auto/v1792040219/skj/SKJlogo.png',
+    'https://res.cloudinary.com/i8sv3vs8/image/upload/f_auto,q_auto/v1792040217/skj/skjshop.jpg',
+    'https://res.cloudinary.com/i8sv3vs8/image/upload/f_auto,q_auto/v1792040218/skj/skjshop1.png',
+  ],
   description: siteConfig.description,
   telephone: siteConfig.phone,
-  priceRange: '₹₹ - ₹₹₹₹',
+  priceRange: '₹₹₹',
+  currenciesAccepted: 'INR',
+  paymentAccepted: 'Cash, Credit Card, Debit Card, UPI, Net Banking',
   address: {
     '@type': 'PostalAddress',
     streetAddress: `${siteConfig.address.line1}, ${siteConfig.address.line2}`,
@@ -106,6 +113,20 @@ const storeSchema = {
     latitude: 16.7486,
     longitude: 81.8436,
   },
+  areaServed: [
+    {
+      '@type': 'City',
+      name: 'Ravulapalem',
+    },
+    {
+      '@type': 'AdministrativeArea',
+      name: 'Dr. B.R. Ambedkar Konaseema District',
+    },
+    {
+      '@type': 'AdministrativeArea',
+      name: 'Andhra Pradesh',
+    },
+  ],
   openingHoursSpecification: [
     {
       '@type': 'OpeningHoursSpecification',
@@ -122,7 +143,12 @@ const storeSchema = {
     },
   ],
   hasMap: 'https://maps.google.com/maps?q=Sri+Kankatala+Jewellers+Ravulapalem',
-  paymentAccepted: 'Cash, Credit Card, Debit Card, UPI',
+  sameAs: [
+    'https://www.instagram.com/srikankatalajewellers/',
+    'https://www.facebook.com/srikankatalajewellers',
+    'https://maps.google.com/maps?q=Sri+Kankatala+Jewellers+Ravulapalem',
+    'https://www.justdial.com/Ravulapalem/Sri-Kankatala-Jewellers-Near-Pedda-Anjaneyaswamy-Temple-Market-Road/9999P8833-8833-221102143431-Y1E7_BZDET',
+  ],
 };
 
 const websiteSchema = {
@@ -130,8 +156,12 @@ const websiteSchema = {
   '@type': 'WebSite',
   '@id': `${siteConfig.siteUrl}/#website`,
   name: siteConfig.businessName,
+  alternateName: ['SKJ', 'Sri Kankatala Jewellers Ravulapalem', 'Sri Kankatala Jewellers Official Website'],
   url: siteConfig.siteUrl,
   description: siteConfig.description,
+  publisher: {
+    '@id': `${siteConfig.siteUrl}/#jewelrystore`,
+  },
 };
 
 export default function RootLayout({ children }) {

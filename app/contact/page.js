@@ -1,4 +1,6 @@
 import ContactClient from '@/components/contact/ContactClient';
+import JsonLd from '@/components/seo/JsonLd';
+import siteConfig from '@/lib/config';
 
 export const metadata = {
   title: 'Contact Sri Kankatala Jewellers | Ravulapalem',
@@ -16,6 +18,30 @@ export const metadata = {
   },
 };
 
+const breadcrumbs = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    {
+      '@type': 'ListItem',
+      position: 1,
+      name: 'Home',
+      item: siteConfig.siteUrl,
+    },
+    {
+      '@type': 'ListItem',
+      position: 2,
+      name: 'Contact Us',
+      item: `${siteConfig.siteUrl}/contact`,
+    },
+  ],
+};
+
 export default function ContactPage() {
-  return <ContactClient />;
+  return (
+    <>
+      <JsonLd data={breadcrumbs} />
+      <ContactClient />
+    </>
+  );
 }

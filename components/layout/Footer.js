@@ -14,12 +14,12 @@ const footerCollections = [
 ];
 
 const footerCategories = [
-  { label: 'Necklaces', href: '/gold/women?category=Necklaces' },
-  { label: 'Harams', href: '/gold/women?category=Harams' },
-  { label: 'Bangles', href: '/gold/women?category=Bangles' },
-  { label: 'Earrings', href: '/gold/women?category=Earrings' },
-  { label: 'Rings', href: '/gold/women?category=Rings' },
-  { label: 'Bracelets', href: '/gold/men?category=Bracelets' },
+  { label: 'Necklaces', href: '/category/necklaces' },
+  { label: 'Harams', href: '/category/harams' },
+  { label: 'Bangles', href: '/category/bangles' },
+  { label: 'Earrings', href: '/category/earrings' },
+  { label: 'Rings', href: '/category/rings' },
+  { label: 'Bracelets', href: '/category/bracelets' },
 ];
 
 const footerLinks = [

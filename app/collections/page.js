@@ -1,5 +1,7 @@
 import { Suspense } from 'react';
 import CatalogueView from '@/components/catalogue/CatalogueView';
+import JsonLd from '@/components/seo/JsonLd';
+import siteConfig from '@/lib/config';
 
 export const metadata = {
   title: 'All Jewellery Collections in Ravulapalem | Sri Kankatala Jewellers',
@@ -17,11 +19,33 @@ export const metadata = {
   },
 };
 
+const breadcrumbs = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    {
+      '@type': 'ListItem',
+      position: 1,
+      name: 'Home',
+      item: siteConfig.siteUrl,
+    },
+    {
+      '@type': 'ListItem',
+      position: 2,
+      name: 'All Collections',
+      item: `${siteConfig.siteUrl}/collections`,
+    },
+  ],
+};
+
 export default function CollectionsPage() {
   return (
-    <Suspense fallback={<CatalogueLoading />}>
-      <CatalogueView material="all" audience="all" />
-    </Suspense>
+    <>
+      <JsonLd data={breadcrumbs} />
+      <Suspense fallback={<CatalogueLoading />}>
+        <CatalogueView material="all" audience="all" />
+      </Suspense>
+    </>
   );
 }
 

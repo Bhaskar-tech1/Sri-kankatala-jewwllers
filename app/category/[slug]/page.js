@@ -28,20 +28,51 @@ export async function generateMetadata({ params }) {
   };
 }
 
+import JsonLd from '@/components/seo/JsonLd';
+import siteConfig from '@/lib/config';
+
 export default async function CategoryPage({ params }) {
   const { slug } = await params;
   const category = categories.find((c) => c.slug === slug);
   const categoryName = category ? category.name : slug;
 
+  const breadcrumbs = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'Home',
+        item: siteConfig.siteUrl,
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: 'Collections',
+        item: `${siteConfig.siteUrl}/collections`,
+      },
+      {
+        '@type': 'ListItem',
+        position: 3,
+        name: categoryName,
+        item: `${siteConfig.siteUrl}/category/${slug}`,
+      },
+    ],
+  };
+
   return (
-    <Suspense fallback={<CatalogueLoading />}>
-      <CatalogueView
-        material="all"
-        audience="all"
-        category={categoryName}
-        categorySlug={slug}
-      />
-    </Suspense>
+    <>
+      <JsonLd data={breadcrumbs} />
+      <Suspense fallback={<CatalogueLoading />}>
+        <CatalogueView
+          material="all"
+          audience="all"
+          category={categoryName}
+          categorySlug={slug}
+        />
+      </Suspense>
+    </>
   );
 }
 

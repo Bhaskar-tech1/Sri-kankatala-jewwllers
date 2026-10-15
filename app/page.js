@@ -7,16 +7,16 @@ import Testimonials from '@/components/home/Testimonials';
 import AosInit from '@/components/home/AosInit';
 
 export const metadata = {
-  title: 'Sri Kankatala Jewellers | Gold & Silver Jewellery in Ravulapalem',
+  title: 'Sri Kankatala Jewellers | Official Website, Ravulapalem',
   description:
-    'Explore gold, silver and bridal jewellery at Sri Kankatala Jewellers in Ravulapalem, Andhra Pradesh. Browse our curated collections of necklaces, bangles, harams, and rings.',
+    'Explore 100% hallmark 22K gold, 925 sterling silver and bridal jewellery at Sri Kankatala Jewellers, the official showroom on Market Road, Ravulapalem, Andhra Pradesh.',
   alternates: {
     canonical: '/',
   },
   openGraph: {
-    title: 'Sri Kankatala Jewellers | Gold & Silver Jewellery in Ravulapalem',
+    title: 'Sri Kankatala Jewellers | Official Website, Ravulapalem',
     description:
-      'Explore gold, silver and bridal jewellery at Sri Kankatala Jewellers in Ravulapalem, Andhra Pradesh. Browse our curated collections of necklaces, bangles, harams, and rings.',
+      'Explore 100% hallmark 22K gold, 925 sterling silver and bridal jewellery at Sri Kankatala Jewellers, the official showroom on Market Road, Ravulapalem, Andhra Pradesh.',
     url: 'https://www.srikankatalajewellers.in',
     type: 'website',
   },

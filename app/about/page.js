@@ -19,9 +19,32 @@ export const metadata = {
   },
 };
 
+import JsonLd from '@/components/seo/JsonLd';
+import siteConfig from '@/lib/config';
+
+const breadcrumbs = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    {
+      '@type': 'ListItem',
+      position: 1,
+      name: 'Home',
+      item: siteConfig.siteUrl,
+    },
+    {
+      '@type': 'ListItem',
+      position: 2,
+      name: 'About Sri Kankatala Jewellers',
+      item: `${siteConfig.siteUrl}/about`,
+    },
+  ],
+};
+
 export default function AboutPage() {
   return (
     <div className="bg-white min-h-screen">
+      <JsonLd data={breadcrumbs} />
 
       {/* Hero section */}
       <section className="bg-skj-ivory text-skj-charcoal relative overflow-hidden">
@@ -107,7 +130,7 @@ export default function AboutPage() {
                 className="text-3xl sm:text-4xl font-semibold mb-6 leading-tight"
                 style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
               >
-                Honouring Life's <br className="hidden sm:block" /> Greatest Milestones
+                Honouring Life&apos;s <br className="hidden sm:block" /> Greatest Milestones
               </h2>
               <div className="space-y-4 text-sm text-skj-charcoal/80 leading-relaxed">
                 <p>
@@ -154,7 +177,7 @@ export default function AboutPage() {
                 className="object-cover opacity-80 group-hover:scale-105 group-hover:opacity-100 transition-all duration-700"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-6">
-                <h3 className="text-white text-xl font-semibold mb-1" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>Men's Silver</h3>
+                <h3 className="text-white text-xl font-semibold mb-1" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>Men&apos;s Silver</h3>
                 <span className="text-skj-gold text-xs font-medium uppercase tracking-wider flex items-center gap-1 group-hover:translate-x-1 transition-transform">
                   Explore <ArrowRight size={14} />
                 </span>
