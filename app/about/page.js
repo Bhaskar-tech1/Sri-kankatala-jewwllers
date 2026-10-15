@@ -169,15 +169,15 @@ export default function AboutPage() {
               </div>
             </Link>
             
-            <Link href="/silver/men" className="group block relative aspect-[5/4] overflow-hidden rounded-2xl bg-skj-deep-olive">
+            <Link href="/gold/men" className="group block relative aspect-[5/4] overflow-hidden rounded-2xl bg-skj-deep-olive">
               <Image
                 src={CLOUDINARY_IMAGES.hero.mensCollectionFeatured}
-                alt="Men's Silver Collection"
+                alt="Gold for Men Collection"
                 fill
                 className="object-cover opacity-80 group-hover:scale-105 group-hover:opacity-100 transition-all duration-700"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-6">
-                <h3 className="text-white text-xl font-semibold mb-1" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>Men&apos;s Silver</h3>
+                <h3 className="text-white text-xl font-semibold mb-1" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>Gold for Men</h3>
                 <span className="text-skj-gold text-xs font-medium uppercase tracking-wider flex items-center gap-1 group-hover:translate-x-1 transition-transform">
                   Explore <ArrowRight size={14} />
                 </span>
