@@ -4,22 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import categories from '@/data/categories';
 
-// Map categories to their primary catalogue routes
-const categoryRouteMap = {
-  Necklaces: '/gold/women',
-  Harams: '/gold/women',
-  Earrings: '/gold/women',
-  Jhumkas: '/gold/women',
-  Bangles: '/gold/women',
-  Rings: '/gold/women',
-  Bracelets: '/gold/men',
-  Pendants: '/gold/women',
-  Mangalsutras: '/gold/women',
-  Anklets: '/gold/women',
-  'Nose Pins': '/gold/women',
-  Papidi: '/gold/women',
-  Watches: '/gold/men',
-};
+
 
 import CLOUDINARY_IMAGES from '@/lib/images';
 
@@ -58,8 +43,7 @@ export default function ShopByCategory() {
         {/* Category grid */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
           {featuredCategories.map((cat, index) => {
-            const route = categoryRouteMap[cat.name] || '/gold/women';
-            const href = `${route}?category=${encodeURIComponent(cat.name)}`;
+            const href = `/category/${cat.slug}`;
             const imageUrl = categoryImages[cat.name] || cat.image || CLOUDINARY_IMAGES.categories[cat.name];
 
             return (
@@ -108,7 +92,7 @@ export default function ShopByCategory() {
 
         {/* View all link */}
         <div className="text-center mt-8" data-aos="fade-up">
-          <Link href="/gold/women" className="btn-secondary">
+          <Link href="/collections" className="btn-secondary">
             View All Collections
           </Link>
         </div>

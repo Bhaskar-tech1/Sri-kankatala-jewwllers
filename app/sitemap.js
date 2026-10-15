@@ -1,4 +1,5 @@
 import siteConfig from '@/lib/config';
+import categories from '@/data/categories';
 import { db } from '@/lib/firebase';
 import { collection, getDocs, query } from 'firebase/firestore';
 
@@ -37,6 +38,18 @@ export default async function sitemap() {
       changeFrequency: 'daily',
       priority: 0.8,
     },
+    {
+      url: `${baseUrl}/collections`,
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 0.9,
+    },
+    ...categories.map((cat) => ({
+      url: `${baseUrl}/category/${cat.slug}`,
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 0.85,
+    })),
     {
       url: `${baseUrl}/about`,
       lastModified: new Date(),

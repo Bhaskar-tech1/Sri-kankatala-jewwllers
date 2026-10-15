@@ -10,6 +10,7 @@ import {
 import { getProductsByRoute, getCategories, getPurityOptions, filterAndSortProducts } from '@/lib/api';
 import { formatPrice } from '@/lib/utils';
 import ProductCard from '@/components/product/ProductCard';
+import allDefaultCategories from '@/data/categories';
 
 const sortOptions = [
   { value: 'featured', label: 'Featured' },
@@ -19,19 +20,50 @@ const sortOptions = [
   { value: 'name', label: 'Name: A to Z' },
 ];
 
-export default function CatalogueView({ material, audience }) {
+function matchCategory(productCat, filterCat) {
+  if (!productCat || !filterCat) return false;
+  const p = productCat.toLowerCase().trim();
+  const f = filterCat.toLowerCase().trim();
+  if (p === f) return true;
+  if (p.replace(/s$/, '') === f.replace(/s$/, '')) return true;
+
+  // Use word boundaries so "rings" NEVER matches inside the word "earrings"
+  const clean = (str) => str.replace(/s$/, '').replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+  const fRegex = new RegExp('\\b' + clean(f) + '(?:s)?\\b', 'i');
+  const pRegex = new RegExp('\\b' + clean(p) + '(?:s)?\\b', 'i');
+  return fRegex.test(p) || pRegex.test(f);
+}
+
+export default function CatalogueView({
+  material = 'all',
+  audience = 'all',
+  category = null,
+  categorySlug = null,
+}) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
 
-  // Read initial filter state from URL
-  const initialCategories = searchParams.get('category') ? searchParams.get('category').split(',') : [];
+  const isMaterialFixed = Boolean(material && material !== 'all');
+  const isAudienceFixed = Boolean(audience && audience !== 'all');
+
+  // Read initial filter state from URL or props
+  const initialCategories = useMemo(() => {
+    if (category) return [category];
+    const catParam = searchParams.get('category');
+    return catParam ? catParam.split(',') : [];
+  }, [category, searchParams]);
+
+  const initialMaterial = isMaterialFixed ? material : (searchParams.get('material') || 'all');
+  const initialAudience = isAudienceFixed ? audience : (searchParams.get('audience') || 'all');
   const initialSearch = searchParams.get('search') || '';
   const initialSort = searchParams.get('sort') || 'featured';
   const initialPurity = searchParams.get('purity') || '';
 
   const [searchQuery, setSearchQuery] = useState(initialSearch);
   const [selectedCategories, setSelectedCategories] = useState(initialCategories);
+  const [selectedMaterial, setSelectedMaterial] = useState(initialMaterial);
+  const [selectedAudience, setSelectedAudience] = useState(initialAudience);
   const [selectedPurity, setSelectedPurity] = useState(initialPurity);
   const [sortBy, setSortBy] = useState(initialSort);
   const [inStockOnly, setInStockOnly] = useState(false);
@@ -51,7 +83,11 @@ export default function CatalogueView({ material, audience }) {
   useEffect(() => {
     async function fetchDynamicProducts() {
       try {
-        const res = await fetch(`/api/products?material=${material}&audience=${audience}`);
+        const queryParams = new URLSearchParams();
+        if (isMaterialFixed) queryParams.set('material', material);
+        if (isAudienceFixed) queryParams.set('audience', audience);
+        const qs = queryParams.toString();
+        const res = await fetch(`/api/products${qs ? `?${qs}` : ''}`);
         const data = await res.json();
         if (data.products && Array.isArray(data.products)) {
           setAllProducts(data.products);
@@ -61,38 +97,154 @@ export default function CatalogueView({ material, audience }) {
       }
     }
     fetchDynamicProducts();
-  }, [material, audience]);
+  }, [material, audience, isMaterialFixed, isAudienceFixed]);
 
-  const categories = useMemo(() => {
-    const cats = [...new Set(allProducts.map((p) => p.category))];
-    return cats.sort();
-  }, [allProducts]);
+  // Keep category in sync if prop changes
+  useEffect(() => {
+    if (category) {
+      setSelectedCategories([category]);
+    }
+  }, [category]);
+
+  const availableCategories = useMemo(() => {
+    const activeCats = [];
+    allProducts.forEach((p) => {
+      if (!p.category) return;
+      const matchedStandard = allDefaultCategories.find((c) => matchCategory(p.category, c.name));
+      const catName = matchedStandard ? matchedStandard.name : p.category;
+      if (!activeCats.some((item) => matchCategory(item, catName))) {
+        activeCats.push(catName);
+      }
+    });
+
+    // Also include any currently selected category so it remains visible and toggleable
+    selectedCategories.forEach((sel) => {
+      if (!activeCats.some((item) => matchCategory(item, sel))) {
+        activeCats.push(sel);
+      }
+    });
+
+    return activeCats.sort();
+  }, [allProducts, selectedCategories]);
 
   const purityOptions = useMemo(() => {
-    return [...new Set(allProducts.map((p) => p.purity))].sort();
+    return [...new Set(allProducts.map((p) => p.purity).filter(Boolean))].sort();
   }, [allProducts]);
 
   // Apply filters and sorting
   const filteredProducts = useMemo(() => {
-    const filters = {
-      category: selectedCategories.length > 0 ? selectedCategories : undefined,
-      purity: selectedPurity || undefined,
-      search: searchQuery || undefined,
-      inStockOnly,
-      minPrice: priceRange.min ? Number(priceRange.min) : undefined,
-      maxPrice: priceRange.max ? Number(priceRange.max) : undefined,
-      minWeight: weightRange.min ? Number(weightRange.min) : undefined,
-      maxWeight: weightRange.max ? Number(weightRange.max) : undefined,
-    };
-    return filterAndSortProducts(allProducts, filters, sortBy);
-  }, [allProducts, selectedCategories, selectedPurity, searchQuery, sortBy, inStockOnly, priceRange, weightRange]);
+    let result = [...allProducts];
+
+    // Category filter
+    if (selectedCategories.length > 0) {
+      result = result.filter((p) =>
+        selectedCategories.some((cat) => matchCategory(p.category, cat))
+      );
+    }
+
+    // Material filter
+    if (isMaterialFixed) {
+      result = result.filter((p) => p.material?.toLowerCase() === material.toLowerCase());
+    } else if (selectedMaterial && selectedMaterial !== 'all') {
+      result = result.filter((p) => p.material?.toLowerCase() === selectedMaterial.toLowerCase());
+    }
+
+    // Audience filter
+    if (isAudienceFixed) {
+      result = result.filter((p) => p.audience?.toLowerCase() === audience.toLowerCase());
+    } else if (selectedAudience && selectedAudience !== 'all') {
+      result = result.filter((p) => p.audience?.toLowerCase() === selectedAudience.toLowerCase());
+    }
+
+    // Purity filter
+    if (selectedPurity) {
+      result = result.filter((p) => p.purity === selectedPurity);
+    }
+
+    // Stock availability
+    if (inStockOnly) {
+      result = result.filter((p) => p.stockStatus === 'in_stock');
+    }
+
+    // Price range
+    if (priceRange.min) {
+      result = result.filter((p) => (p.price || 0) >= Number(priceRange.min));
+    }
+    if (priceRange.max) {
+      result = result.filter((p) => (p.price || 0) <= Number(priceRange.max));
+    }
+
+    // Weight range
+    if (weightRange.min) {
+      result = result.filter((p) => (p.weightGrams || 0) >= Number(weightRange.min));
+    }
+    if (weightRange.max) {
+      result = result.filter((p) => (p.weightGrams || 0) <= Number(weightRange.max));
+    }
+
+    // Search query
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase().trim();
+      result = result.filter(
+        (p) =>
+          p.name?.toLowerCase().includes(q) ||
+          p.category?.toLowerCase().includes(q) ||
+          p.description?.toLowerCase().includes(q) ||
+          p.material?.toLowerCase().includes(q) ||
+          p.purity?.toLowerCase().includes(q)
+      );
+    }
+
+    // Sorting
+    switch (sortBy) {
+      case 'price_asc':
+        result.sort((a, b) => (a.price || 0) - (b.price || 0));
+        break;
+      case 'price_desc':
+        result.sort((a, b) => (b.price || 0) - (a.price || 0));
+        break;
+      case 'newest':
+        result.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+        break;
+      case 'name':
+        result.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+        break;
+      case 'featured':
+      default:
+        result.sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0));
+        break;
+    }
+
+    return result;
+  }, [
+    allProducts,
+    selectedCategories,
+    selectedMaterial,
+    selectedAudience,
+    isMaterialFixed,
+    isAudienceFixed,
+    material,
+    audience,
+    selectedPurity,
+    searchQuery,
+    sortBy,
+    inStockOnly,
+    priceRange,
+    weightRange,
+  ]);
 
   // Update URL params when filters change
   const updateURL = useCallback(
     (params) => {
       const newParams = new URLSearchParams();
-      if (params.categories && params.categories.length > 0) {
+      if (!category && params.categories && params.categories.length > 0) {
         newParams.set('category', params.categories.join(','));
+      }
+      if (!isMaterialFixed && params.material && params.material !== 'all') {
+        newParams.set('material', params.material);
+      }
+      if (!isAudienceFixed && params.audience && params.audience !== 'all') {
+        newParams.set('audience', params.audience);
       }
       if (params.search) newParams.set('search', params.search);
       if (params.sort && params.sort !== 'featured') newParams.set('sort', params.sort);
@@ -100,7 +252,7 @@ export default function CatalogueView({ material, audience }) {
       const qs = newParams.toString();
       router.replace(`${pathname}${qs ? `?${qs}` : ''}`, { scroll: false });
     },
-    [pathname, router]
+    [pathname, router, category, isMaterialFixed, isAudienceFixed]
   );
 
   // Debounced search URL update
@@ -108,13 +260,15 @@ export default function CatalogueView({ material, audience }) {
     const timeout = setTimeout(() => {
       updateURL({
         categories: selectedCategories,
+        material: selectedMaterial,
+        audience: selectedAudience,
         search: searchQuery,
         sort: sortBy,
         purity: selectedPurity,
       });
     }, 300);
     return () => clearTimeout(timeout);
-  }, [searchQuery, selectedCategories, sortBy, selectedPurity, updateURL]);
+  }, [searchQuery, selectedCategories, selectedMaterial, selectedAudience, sortBy, selectedPurity, updateURL]);
 
   // Lock body when mobile filters open
   useEffect(() => {
@@ -122,17 +276,23 @@ export default function CatalogueView({ material, audience }) {
     return () => { document.body.style.overflow = ''; };
   }, [mobileFiltersOpen]);
 
-  const activeFilterCount = selectedCategories.length + [
-    selectedPurity,
-    inStockOnly,
-    priceRange.min,
-    priceRange.max,
-    weightRange.min,
-    weightRange.max,
-  ].filter(Boolean).length;
+  const activeFilterCount =
+    (!category ? selectedCategories.length : (selectedCategories.length > 1 ? selectedCategories.length - 1 : 0)) +
+    (!isMaterialFixed && selectedMaterial !== 'all' ? 1 : 0) +
+    (!isAudienceFixed && selectedAudience !== 'all' ? 1 : 0) +
+    [
+      selectedPurity,
+      inStockOnly,
+      priceRange.min,
+      priceRange.max,
+      weightRange.min,
+      weightRange.max,
+    ].filter(Boolean).length;
 
   const clearAllFilters = () => {
-    setSelectedCategories([]);
+    if (!category) setSelectedCategories([]);
+    if (!isMaterialFixed) setSelectedMaterial('all');
+    if (!isAudienceFixed) setSelectedAudience('all');
     setSelectedPurity('');
     setInStockOnly(false);
     setPriceRange({ min: '', max: '' });
@@ -141,52 +301,146 @@ export default function CatalogueView({ material, audience }) {
     setSortBy('featured');
   };
 
-  const materialLabel = material === 'gold' ? 'Gold' : 'Silver';
-  const audienceLabel = audience === 'men' ? 'Men' : 'Women';
-  const pageTitle = `${materialLabel} Jewellery for ${audienceLabel}`;
+  // Dynamic header titles
+  let pageTitle = '';
+  let pageDescription = '';
+
+  if (category) {
+    pageTitle = `${category} Collection`;
+    pageDescription = `Explore our curated handcrafted ${category.toLowerCase()} designs in pure gold and silver for women and men.`;
+  } else if (isMaterialFixed && isAudienceFixed) {
+    const matText = material === 'gold' ? 'Gold' : 'Silver';
+    const audText = audience === 'men' ? 'Men' : 'Women';
+    pageTitle = `${matText} Jewellery for ${audText}`;
+    pageDescription = `Explore our collection of ${matText.toLowerCase()} jewellery designed for ${audText.toLowerCase()}.`;
+  } else if (isMaterialFixed) {
+    const matText = material === 'gold' ? 'Gold' : 'Silver';
+    pageTitle = `${matText} Jewellery Collection`;
+    pageDescription = `Explore our collection of pure ${matText.toLowerCase()} jewellery.`;
+  } else {
+    pageTitle = 'All Jewellery Collections';
+    pageDescription = 'Explore our complete collection of 22K gold and 92.5 pure silver jewellery for women and men.';
+  }
 
   // Shared filter panel content
   const filterContent = (
-    <div className="bg-white rounded-2xl shadow-sm border border-skj-border/60 p-6 space-y-8 max-h-[calc(100vh-140px)] overflow-y-auto custom-scrollbar">
-      {/* Categories */}
-      <div>
-        <h3 className="text-xs font-bold uppercase tracking-widest text-skj-charcoal mb-4"
-          style={{ fontFamily: 'Inter, system-ui, sans-serif' }}>
-          Category
-        </h3>
-        <div className="space-y-3 max-h-[220px] overflow-y-auto custom-scrollbar pr-3">
-          {categories.map((cat) => {
-            const count = allProducts.filter(p => p.category === cat).length;
-            const isChecked = selectedCategories.includes(cat);
-            return (
-              <label key={cat} className="flex items-center justify-between cursor-pointer group">
-                <div className="flex items-center gap-3">
-                  <input
-                    type="checkbox"
-                    checked={isChecked}
-                    onChange={() => {
-                      setSelectedCategories(prev =>
-                        prev.includes(cat) ? prev.filter(c => c !== cat) : [...prev, cat]
-                      );
-                    }}
-                    className="w-4 h-4 rounded border-skj-border/80 text-skj-olive focus:ring-skj-olive accent-skj-olive cursor-pointer"
-                  />
-                  <span className={`text-sm transition-colors ${isChecked ? 'text-skj-olive font-semibold' : 'text-skj-charcoal group-hover:text-skj-olive'}`}>
-                    {cat}
-                  </span>
-                </div>
-                <span className="text-xs font-medium text-skj-muted/60">{count}</span>
-              </label>
-            );
-          })}
+    <div className="bg-white rounded-2xl shadow-sm border border-skj-border/60 p-6 space-y-7 max-h-[calc(100vh-140px)] overflow-y-auto custom-scrollbar">
+      {/* Metal Filter (when not fixed to a specific material route) */}
+      {!isMaterialFixed && (
+        <div>
+          <h3
+            className="text-xs font-bold uppercase tracking-widest text-skj-charcoal mb-3"
+            style={{ fontFamily: 'Inter, system-ui, sans-serif' }}
+          >
+            Metal
+          </h3>
+          <div className="flex flex-wrap gap-2">
+            {[
+              { id: 'all', label: 'All Metals' },
+              { id: 'gold', label: 'Gold' },
+              { id: 'silver', label: 'Silver' },
+            ].map((m) => (
+              <button
+                key={m.id}
+                onClick={() => setSelectedMaterial(m.id)}
+                className={`px-3 py-1.5 text-xs font-medium border transition-colors ${
+                  selectedMaterial === m.id
+                    ? 'border-skj-olive bg-skj-olive text-white'
+                    : 'border-skj-border text-skj-charcoal hover:border-skj-olive'
+                }`}
+              >
+                {m.label}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
+
+      {/* Gender / Audience Filter (when not fixed to a specific audience route) */}
+      {!isAudienceFixed && (
+        <div>
+          <h3
+            className="text-xs font-bold uppercase tracking-widest text-skj-charcoal mb-3"
+            style={{ fontFamily: 'Inter, system-ui, sans-serif' }}
+          >
+            Gender
+          </h3>
+          <div className="flex flex-wrap gap-2">
+            {[
+              { id: 'all', label: 'All' },
+              { id: 'women', label: 'Women' },
+              { id: 'men', label: 'Men' },
+            ].map((a) => (
+              <button
+                key={a.id}
+                onClick={() => setSelectedAudience(a.id)}
+                className={`px-3 py-1.5 text-xs font-medium border transition-colors ${
+                  selectedAudience === a.id
+                    ? 'border-skj-olive bg-skj-olive text-white'
+                    : 'border-skj-border text-skj-charcoal hover:border-skj-olive'
+                }`}
+              >
+                {a.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Categories */}
+      {availableCategories.length > 0 && (
+        <div>
+          <h3
+            className="text-xs font-bold uppercase tracking-widest text-skj-charcoal mb-4"
+            style={{ fontFamily: 'Inter, system-ui, sans-serif' }}
+          >
+            Category
+          </h3>
+          <div className="space-y-3 max-h-[220px] overflow-y-auto custom-scrollbar pr-3">
+            {availableCategories.map((cat) => {
+              const count = allProducts.filter((p) => matchCategory(p.category, cat)).length;
+              const isChecked = selectedCategories.some((c) => matchCategory(c, cat));
+
+              return (
+                <label key={cat} className="flex items-center justify-between cursor-pointer group">
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="checkbox"
+                      checked={isChecked}
+                      onChange={() => {
+                        setSelectedCategories((prev) =>
+                          prev.some((c) => matchCategory(c, cat))
+                            ? prev.filter((c) => !matchCategory(c, cat))
+                            : [...prev, cat]
+                        );
+                      }}
+                      className="w-4 h-4 rounded border-skj-border/80 text-skj-olive focus:ring-skj-olive accent-skj-olive cursor-pointer"
+                    />
+                    <span
+                      className={`text-sm transition-colors ${
+                        isChecked
+                          ? 'text-skj-olive font-semibold'
+                          : 'text-skj-charcoal group-hover:text-skj-olive'
+                      }`}
+                    >
+                      {cat}
+                    </span>
+                  </div>
+                  <span className="text-xs font-medium text-skj-muted/60">{count}</span>
+                </label>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Purity */}
       {purityOptions.length > 0 && (
         <div>
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-skj-charcoal mb-3"
-            style={{ fontFamily: 'Inter, system-ui, sans-serif' }}>
+          <h3
+            className="text-xs font-semibold uppercase tracking-wider text-skj-charcoal mb-3"
+            style={{ fontFamily: 'Inter, system-ui, sans-serif' }}
+          >
             Purity
           </h3>
           <div className="flex flex-wrap gap-2">
@@ -209,8 +463,10 @@ export default function CatalogueView({ material, audience }) {
 
       {/* Price Range */}
       <div>
-        <h3 className="text-xs font-semibold uppercase tracking-wider text-skj-charcoal mb-3"
-          style={{ fontFamily: 'Inter, system-ui, sans-serif' }}>
+        <h3
+          className="text-xs font-semibold uppercase tracking-wider text-skj-charcoal mb-3"
+          style={{ fontFamily: 'Inter, system-ui, sans-serif' }}
+        >
           Price Range (₹)
         </h3>
         <div className="flex gap-2">
@@ -236,8 +492,10 @@ export default function CatalogueView({ material, audience }) {
 
       {/* Weight Range */}
       <div>
-        <h3 className="text-xs font-semibold uppercase tracking-wider text-skj-charcoal mb-3"
-          style={{ fontFamily: 'Inter, system-ui, sans-serif' }}>
+        <h3
+          className="text-xs font-semibold uppercase tracking-wider text-skj-charcoal mb-3"
+          style={{ fontFamily: 'Inter, system-ui, sans-serif' }}
+        >
           Weight (grams)
         </h3>
         <div className="flex gap-2">
@@ -288,7 +546,6 @@ export default function CatalogueView({ material, audience }) {
 
   return (
     <div className="bg-white min-h-screen">
-
       {/* Page header */}
       <div className="bg-skj-ivory/50 border-b border-skj-border/30">
         <div className="section-container py-6 sm:py-8">
@@ -298,9 +555,7 @@ export default function CatalogueView({ material, audience }) {
           >
             {pageTitle}
           </h1>
-          <p className="text-sm text-skj-muted">
-            Explore our collection of {materialLabel.toLowerCase()} jewellery designed for {audienceLabel.toLowerCase()}.
-          </p>
+          <p className="text-sm text-skj-muted">{pageDescription}</p>
         </div>
       </div>
 
@@ -341,7 +596,10 @@ export default function CatalogueView({ material, audience }) {
                 </option>
               ))}
             </select>
-            <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-skj-muted pointer-events-none" />
+            <ChevronDown
+              size={14}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-skj-muted pointer-events-none"
+            />
           </div>
 
           {/* Mobile filter toggle */}
@@ -362,10 +620,40 @@ export default function CatalogueView({ material, audience }) {
         {/* Active filter chips */}
         {activeFilterCount > 0 && (
           <div className="flex flex-wrap gap-2 mb-4">
-            {selectedCategories.map(cat => (
-              <span key={cat} className="inline-flex items-center gap-1 px-3 py-1 bg-skj-olive/10 text-skj-olive text-xs font-medium rounded-full">
+            {!isMaterialFixed && selectedMaterial !== 'all' && (
+              <span className="inline-flex items-center gap-1 px-3 py-1 bg-skj-olive/10 text-skj-olive text-xs font-medium rounded-full capitalize">
+                Metal: {selectedMaterial}
+                <button
+                  onClick={() => setSelectedMaterial('all')}
+                  aria-label="Remove metal filter"
+                >
+                  <X size={12} />
+                </button>
+              </span>
+            )}
+            {!isAudienceFixed && selectedAudience !== 'all' && (
+              <span className="inline-flex items-center gap-1 px-3 py-1 bg-skj-olive/10 text-skj-olive text-xs font-medium rounded-full capitalize">
+                Gender: {selectedAudience}
+                <button
+                  onClick={() => setSelectedAudience('all')}
+                  aria-label="Remove gender filter"
+                >
+                  <X size={12} />
+                </button>
+              </span>
+            )}
+            {selectedCategories.map((cat) => (
+              <span
+                key={cat}
+                className="inline-flex items-center gap-1 px-3 py-1 bg-skj-olive/10 text-skj-olive text-xs font-medium rounded-full"
+              >
                 {cat}
-                <button onClick={() => setSelectedCategories(prev => prev.filter(c => c !== cat))} aria-label={`Remove ${cat} filter`}>
+                <button
+                  onClick={() =>
+                    setSelectedCategories((prev) => prev.filter((c) => !matchCategory(c, cat)))
+                  }
+                  aria-label={`Remove ${cat} filter`}
+                >
                   <X size={12} />
                 </button>
               </span>
@@ -455,8 +743,10 @@ export default function CatalogueView({ material, audience }) {
           />
           <div className="absolute bottom-0 left-0 right-0 max-h-[80vh] bg-white overflow-y-auto animate-slideUp">
             <div className="sticky top-0 bg-white border-b border-skj-border flex items-center justify-between px-5 py-3 z-10">
-              <h2 className="text-sm font-semibold text-skj-charcoal uppercase tracking-wider"
-                style={{ fontFamily: 'Inter, system-ui, sans-serif' }}>
+              <h2
+                className="text-sm font-semibold text-skj-charcoal uppercase tracking-wider"
+                style={{ fontFamily: 'Inter, system-ui, sans-serif' }}
+              >
                 Filters
               </h2>
               <button
@@ -467,9 +757,7 @@ export default function CatalogueView({ material, audience }) {
                 <X size={20} />
               </button>
             </div>
-            <div className="p-5">
-              {filterContent}
-            </div>
+            <div className="p-5">{filterContent}</div>
             <div className="sticky bottom-0 bg-white border-t border-skj-border p-4">
               <button
                 onClick={() => setMobileFiltersOpen(false)}
@@ -484,13 +772,17 @@ export default function CatalogueView({ material, audience }) {
 
       <style jsx global>{`
         @keyframes slideUp {
-          from { transform: translateY(100%); }
-          to { transform: translateY(0); }
+          from {
+            transform: translateY(100%);
+          }
+          to {
+            transform: translateY(0);
+          }
         }
         .animate-slideUp {
           animation: slideUp 0.3s ease-out;
         }
-        
+
         /* Custom scrollbar for filter card */
         .custom-scrollbar::-webkit-scrollbar {
           width: 4px;
@@ -499,11 +791,11 @@ export default function CatalogueView({ material, audience }) {
           background: transparent;
         }
         .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: #E5E7EB;
+          background: #e5e7eb;
           border-radius: 10px;
         }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-          background: #5F5F01;
+          background: #5f5f01;
         }
       `}</style>
     </div>
