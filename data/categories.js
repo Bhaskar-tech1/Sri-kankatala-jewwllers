@@ -27,7 +27,7 @@ const categories = [
   {
     name: 'Jhumkas',
     slug: 'jhumkas',
-    image: CLOUDINARY_IMAGES.categories.Jumkas,
+    image: CLOUDINARY_IMAGES.categories.Jhumkas || CLOUDINARY_IMAGES.categories.Jumkas,
     description: 'Traditional South Indian jhumka earrings',
   },
   {
@@ -57,7 +57,7 @@ const categories = [
   {
     name: 'Mangalsutras',
     slug: 'mangalsutras',
-    image: CLOUDINARY_IMAGES.categories.Mangalasustras,
+    image: CLOUDINARY_IMAGES.categories.Mangalsutras || CLOUDINARY_IMAGES.categories.Mangalasustras,
     description: 'Sacred mangalsutras crafted with care',
   },
   {

@@ -33,11 +33,11 @@ const categoryImages = {
   Necklaces: CLOUDINARY_IMAGES.categories.Necklaces,
   Harams: CLOUDINARY_IMAGES.categories.Harams,
   Earrings: CLOUDINARY_IMAGES.categories.Earrings,
-  Jhumkas: CLOUDINARY_IMAGES.categories.Jumkas,
+  Jhumkas: CLOUDINARY_IMAGES.categories.Jhumkas || CLOUDINARY_IMAGES.categories.Jumkas,
   Rings: CLOUDINARY_IMAGES.categories.Rings,
   Bangles: CLOUDINARY_IMAGES.categories.Bangles,
   Bracelets: CLOUDINARY_IMAGES.categories.Bracelets,
-  Mangalsutras: CLOUDINARY_IMAGES.categories.Mangalasustras,
+  Mangalsutras: CLOUDINARY_IMAGES.categories.Mangalsutras || CLOUDINARY_IMAGES.categories.Mangalasustras,
 };
 
 export default function ShopByCategory() {
@@ -60,6 +60,7 @@ export default function ShopByCategory() {
           {featuredCategories.map((cat, index) => {
             const route = categoryRouteMap[cat.name] || '/gold/women';
             const href = `${route}?category=${encodeURIComponent(cat.name)}`;
+            const imageUrl = categoryImages[cat.name] || cat.image || CLOUDINARY_IMAGES.categories[cat.name];
 
             return (
               <Link
@@ -72,11 +73,12 @@ export default function ShopByCategory() {
               >
                 <div className="relative aspect-square overflow-hidden rounded-full bg-gradient-to-br from-skj-ivory to-skj-border/60 shadow-lg hover:shadow-2xl ring-4 ring-white transition-all duration-300">
                   {/* Category Image */}
-                  {categoryImages[cat.name] && (
+                  {imageUrl && (
                     <Image
-                      src={categoryImages[cat.name]}
+                      src={imageUrl}
                       alt={cat.name}
                       fill
+                      unoptimized
                       priority
                       className="object-cover group-hover:scale-105 transition-transform duration-700"
                       sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
