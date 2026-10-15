@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import {
@@ -13,7 +13,7 @@ import { getRelatedProducts } from '@/lib/api';
 import ProductCard from '@/components/product/ProductCard';
 import Toast from '@/components/ui/Toast';
 
-export default function ProductDetailClient({ product }) {
+export default function ProductDetailClient({ product, initialRelatedProducts = [] }) {
   const { addToCart } = useCart();
   const [quantity, setQuantity] = useState(1);
   const [showToast, setShowToast] = useState(false);
@@ -21,7 +21,45 @@ export default function ProductDetailClient({ product }) {
   const [copied, setCopied] = useState(false);
   const [justAdded, setJustAdded] = useState(false);
 
-  const relatedProducts = getRelatedProducts(product, 4);
+  const [relatedProducts, setRelatedProducts] = useState(initialRelatedProducts);
+
+  // Sync with Firestore catalogue if initialRelatedProducts was empty
+  useEffect(() => {
+    if (initialRelatedProducts && initialRelatedProducts.length > 0) {
+      setRelatedProducts(initialRelatedProducts);
+      return;
+    }
+
+    async function loadRelated() {
+      try {
+        const res = await fetch('/api/products');
+        const data = await res.json();
+        if (data.products && Array.isArray(data.products)) {
+          const candidates = data.products.filter(
+            (p) => p.id !== product.id && p.slug !== product.slug && p.stockStatus !== 'out_of_stock'
+          );
+          const sameCat = candidates.filter(
+            (p) =>
+              p.material?.toLowerCase() === product.material?.toLowerCase() &&
+              p.category?.toLowerCase() === product.category?.toLowerCase()
+          );
+          const sameMaterial = candidates.filter(
+            (p) =>
+              p.material?.toLowerCase() === product.material?.toLowerCase() &&
+              p.category?.toLowerCase() !== product.category?.toLowerCase()
+          );
+          const others = candidates.filter(
+            (p) => p.material?.toLowerCase() !== product.material?.toLowerCase()
+          );
+          const finalRelated = [...sameCat, ...sameMaterial, ...others].slice(0, 4);
+          setRelatedProducts(finalRelated);
+        }
+      } catch (err) {
+        console.warn('Failed to load related products:', err);
+      }
+    }
+    loadRelated();
+  }, [product, initialRelatedProducts]);
   const isOutOfStock = product.stockStatus === 'out_of_stock';
   const materialLabel = product.material === 'gold' ? 'Gold' : 'Silver';
   const audienceLabel = product.audience === 'men' ? 'Men' : 'Women';
@@ -277,19 +315,24 @@ export default function ProductDetailClient({ product }) {
         </div>
       </div>
 
-      {/* Related products */}
+      {/* Related products / You May Also Like */}
       {relatedProducts.length > 0 && (
-        <section className="section-spacing bg-skj-ivory" aria-labelledby="related-title">
+        <section className="section-spacing bg-[#FAF9F5] border-t border-[#EAE6DF]" aria-labelledby="related-title">
           <div className="section-container">
-            <h2
-              id="related-title"
-              className="section-title"
-            >
-              You May Also Like
-            </h2>
-            <span className="section-divider" aria-hidden="true" />
+            <div className="text-center mb-8">
+              <h2
+                id="related-title"
+                className="section-title text-2xl md:text-3xl font-serif text-skj-charcoal"
+              >
+                You May Also Like
+              </h2>
+              <span className="section-divider" aria-hidden="true" />
+              <p className="text-xs sm:text-sm text-skj-muted mt-2 max-w-md mx-auto">
+                Explore handpicked complementary designs in pure gold and sterling silver.
+              </p>
+            </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-5 mt-8">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
               {relatedProducts.map((rp) => (
                 <ProductCard key={rp.id} product={rp} />
               ))}

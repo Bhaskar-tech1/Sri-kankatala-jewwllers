@@ -1,4 +1,4 @@
-import { getAllProducts, getProductBySlug } from '@/lib/api';
+import { getAllProducts, getProductBySlug, getRelatedProductsAsync } from '@/lib/api';
 import ProductDetailClient from '@/components/product/ProductDetailClient';
 import { notFound } from 'next/navigation';
 import CLOUDINARY_IMAGES from '@/lib/images';
@@ -147,11 +147,16 @@ export default async function ProductPage({ params }) {
     ],
   };
 
+  const relatedProducts = await getRelatedProductsAsync(product, 4);
+
   return (
     <>
       <JsonLd data={productSchema} />
       <JsonLd data={breadcrumbSchema} />
-      <ProductDetailClient product={product} />
+      <ProductDetailClient
+        product={product}
+        initialRelatedProducts={relatedProducts}
+      />
     </>
   );
 }
