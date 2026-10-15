@@ -14,13 +14,15 @@ import ProductCard from '@/components/product/ProductCard';
 import Toast from '@/components/ui/Toast';
 
 export default function ProductDetailClient({ product }) {
-  const { addToCart, isInCart } = useCart();
+  const { addToCart } = useCart();
   const [quantity, setQuantity] = useState(1);
   const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+  const [copied, setCopied] = useState(false);
+  const [justAdded, setJustAdded] = useState(false);
 
   const relatedProducts = getRelatedProducts(product, 4);
   const isOutOfStock = product.stockStatus === 'out_of_stock';
-  const alreadyInCart = isInCart(product.id);
   const materialLabel = product.material === 'gold' ? 'Gold' : 'Silver';
   const audienceLabel = product.audience === 'men' ? 'Men' : 'Women';
   const catalogueHref = `/${product.material}/${product.audience}`;
@@ -28,7 +30,41 @@ export default function ProductDetailClient({ product }) {
   const handleAddToCart = () => {
     if (isOutOfStock) return;
     addToCart(product, quantity);
+    setToastMessage(`${quantity} × ${product.name} added to cart`);
     setShowToast(true);
+    setJustAdded(true);
+    setTimeout(() => {
+      setJustAdded(false);
+    }, 1500);
+  };
+
+  const handleShare = async () => {
+    const url = typeof window !== 'undefined' ? window.location.href : '';
+    const shareData = {
+      title: `${product.name} | Sri Kankatala Jewellers`,
+      text: `Take a look at ${product.name} at Sri Kankatala Jewellers:\n${url}`,
+      url: url,
+    };
+
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+        return;
+      } catch (err) {
+        if (err.name === 'AbortError') return;
+      }
+    }
+
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      setToastMessage('Link copied! You can now share it with family and friends.');
+      setShowToast(true);
+      setTimeout(() => setCopied(false), 3000);
+    } catch {
+      const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(`Check out ${product.name} at Sri Kankatala Jewellers: ${url}`)}`;
+      window.open(waUrl, '_blank');
+    }
   };
 
   return (
@@ -75,19 +111,31 @@ export default function ProductDetailClient({ product }) {
 
           {/* Right: Product info */}
           <div>
-            {/* Category tag */}
-            <div className="flex items-center gap-2 mb-3">
-              <Link
-                href={`${catalogueHref}?category=${encodeURIComponent(product.category)}`}
-                className="text-xs font-semibold text-skj-olive uppercase tracking-[0.15em] hover:text-skj-deep-olive transition-colors"
-                style={{ fontFamily: 'Inter, system-ui, sans-serif' }}
+            {/* Category tag & Share */}
+            <div className="flex items-center justify-between gap-2 mb-3">
+              <div className="flex items-center gap-2">
+                <Link
+                  href={`${catalogueHref}?category=${encodeURIComponent(product.category)}`}
+                  className="text-xs font-semibold text-skj-olive uppercase tracking-[0.15em] hover:text-skj-deep-olive transition-colors"
+                  style={{ fontFamily: 'Inter, system-ui, sans-serif' }}
+                >
+                  {product.category}
+                </Link>
+                <span className="text-skj-border">·</span>
+                <span className="text-xs text-skj-muted uppercase tracking-wider">
+                  {materialLabel} {product.purity}
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={handleShare}
+                className="inline-flex items-center gap-1.5 text-xs font-medium text-skj-muted hover:text-skj-olive transition-colors py-1 px-2.5 rounded-full hover:bg-skj-ivory cursor-pointer"
+                title="Share this product"
+                aria-label="Share this product"
               >
-                {product.category}
-              </Link>
-              <span className="text-skj-border">·</span>
-              <span className="text-xs text-skj-muted uppercase tracking-wider">
-                {materialLabel} {product.purity}
-              </span>
+                <Share2 size={14} />
+                <span className="hidden sm:inline">{copied ? 'Copied' : 'Share'}</span>
+              </button>
             </div>
 
             {/* Product name */}
@@ -136,11 +184,11 @@ export default function ProductDetailClient({ product }) {
               </div>
             </div>
 
-            {/* Quantity + Add to Cart */}
+            {/* Quantity + Add to Cart + Share */}
             {!isOutOfStock && (
               <div className="flex flex-col sm:flex-row gap-3 mb-6">
                 {/* Quantity selector */}
-                <div className="flex items-center border border-skj-border rounded-full overflow-hidden bg-white">
+                <div className="flex items-center justify-between sm:justify-start border border-skj-border rounded-full overflow-hidden bg-white">
                   <button
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
                     className="p-3 text-skj-charcoal hover:bg-skj-ivory transition-colors"
@@ -162,17 +210,18 @@ export default function ProductDetailClient({ product }) {
 
                 {/* Add to Cart */}
                 <button
+                  type="button"
                   onClick={handleAddToCart}
-                  className={`flex-1 flex items-center justify-center gap-2 py-3 px-6 text-sm font-semibold uppercase tracking-wider transition-all duration-300 rounded-full ${
-                    alreadyInCart
-                      ? 'bg-skj-olive/10 text-skj-olive border border-skj-olive/30'
+                  className={`flex-1 flex items-center justify-center gap-2 py-3 px-6 text-sm font-semibold uppercase tracking-wider transition-all duration-300 rounded-full cursor-pointer ${
+                    justAdded
+                      ? 'bg-skj-deep-olive text-white shadow-md scale-[1.01]'
                       : 'bg-skj-olive text-white hover:bg-skj-deep-olive'
                   }`}
                 >
-                  {alreadyInCart ? (
+                  {justAdded ? (
                     <>
                       <Check size={16} />
-                      Added to Cart
+                      Added to Cart!
                     </>
                   ) : (
                     <>
@@ -181,12 +230,35 @@ export default function ProductDetailClient({ product }) {
                     </>
                   )}
                 </button>
+
+                {/* Share Button */}
+                <button
+                  type="button"
+                  onClick={handleShare}
+                  className="flex items-center justify-center gap-2 py-3 px-5 text-sm font-semibold uppercase tracking-wider border border-skj-border hover:border-skj-olive text-skj-charcoal hover:text-skj-olive transition-all duration-300 rounded-full bg-white hover:bg-skj-ivory/50 cursor-pointer"
+                  title="Share with family or friends"
+                  aria-label="Share this product"
+                >
+                  <Share2 size={16} />
+                  <span>{copied ? 'Copied' : 'Share'}</span>
+                </button>
               </div>
             )}
 
             {isOutOfStock && (
-              <div className="p-4 bg-red-50 border border-red-100 text-sm text-skj-red mb-6">
-                This product is currently out of stock. Please check back later or contact us for availability.
+              <div className="mb-6">
+                <div className="p-4 bg-red-50 border border-red-100 text-sm text-skj-red mb-3">
+                  This product is currently out of stock. Please check back later or contact us for availability.
+                </div>
+                <button
+                  type="button"
+                  onClick={handleShare}
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 py-3 px-6 text-sm font-semibold uppercase tracking-wider border border-skj-border hover:border-skj-olive text-skj-charcoal hover:text-skj-olive transition-all duration-300 rounded-full bg-white hover:bg-skj-ivory/50 cursor-pointer"
+                  aria-label="Share this product"
+                >
+                  <Share2 size={16} />
+                  <span>{copied ? 'Link Copied!' : 'Share Product'}</span>
+                </button>
               </div>
             )}
 
@@ -228,7 +300,7 @@ export default function ProductDetailClient({ product }) {
 
       {showToast && (
         <Toast
-          message={`${product.name} added to cart`}
+          message={toastMessage}
           onClose={() => setShowToast(false)}
         />
       )}

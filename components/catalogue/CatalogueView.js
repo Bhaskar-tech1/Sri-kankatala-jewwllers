@@ -5,7 +5,7 @@ import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import {
   Search, SlidersHorizontal, X, ChevronDown,
-  LayoutGrid, List,
+  LayoutGrid, List, Plus,
 } from 'lucide-react';
 import { getProductsByRoute, getCategories, getPurityOptions, filterAndSortProducts } from '@/lib/api';
 import { formatPrice } from '@/lib/utils';
@@ -70,6 +70,7 @@ export default function CatalogueView({
   const [priceRange, setPriceRange] = useState({ min: '', max: '' });
   const [weightRange, setWeightRange] = useState({ min: '', max: '' });
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(9); // 9 products per batch (3x3 grid) to conserve Cloudinary bandwidth
 
   // Initial static fallback products for instant rendering
   const staticProducts = useMemo(
@@ -233,6 +234,26 @@ export default function CatalogueView({
     weightRange,
   ]);
 
+  // Sliced products for display (loads 9 at a time to conserve Cloudinary image bandwidth)
+  const displayedProducts = useMemo(() => {
+    return filteredProducts.slice(0, visibleCount);
+  }, [filteredProducts, visibleCount]);
+
+  // Reset pagination to 9 whenever search, filters, or sorting change
+  useEffect(() => {
+    setVisibleCount(9);
+  }, [
+    selectedCategories,
+    selectedMaterial,
+    selectedAudience,
+    selectedPurity,
+    inStockOnly,
+    priceRange,
+    weightRange,
+    searchQuery,
+    sortBy,
+  ]);
+
   // Update URL params when filters change
   const updateURL = useCallback(
     (params) => {
@@ -299,6 +320,7 @@ export default function CatalogueView({
     setWeightRange({ min: '', max: '' });
     setSearchQuery('');
     setSortBy('featured');
+    setVisibleCount(9);
   };
 
   // Dynamic header titles
@@ -679,7 +701,9 @@ export default function CatalogueView({
 
         {/* Product count */}
         <p className="text-xs text-skj-muted mb-4">
-          {filteredProducts.length} {filteredProducts.length === 1 ? 'product' : 'products'} found
+          Showing <span className="font-semibold text-skj-charcoal">{Math.min(visibleCount, filteredProducts.length)}</span> of{' '}
+          <span className="font-semibold text-skj-charcoal">{filteredProducts.length}</span>{' '}
+          {filteredProducts.length === 1 ? 'product' : 'products'}
         </p>
 
         {/* Main content: Sidebar + Product grid */}
@@ -700,11 +724,39 @@ export default function CatalogueView({
           {/* Product grid */}
           <div className="flex-1">
             {filteredProducts.length > 0 ? (
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-5">
-                {filteredProducts.map((product) => (
-                  <ProductCard key={product.id} product={product} />
-                ))}
-              </div>
+              <>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-5">
+                  {displayedProducts.map((product) => (
+                    <ProductCard key={product.id} product={product} />
+                  ))}
+                </div>
+
+                {/* Load More Button matching User Design & Brand Theme */}
+                {visibleCount < filteredProducts.length && (
+                  <div className="mt-12 mb-8 flex flex-col items-center justify-center gap-2.5">
+                    <button
+                      type="button"
+                      onClick={() => setVisibleCount((prev) => prev + 9)}
+                      className="inline-flex items-center justify-center gap-2 px-8 py-3 rounded-2xl border-2 border-skj-olive text-skj-olive font-semibold text-sm hover:bg-skj-olive hover:text-white transition-all duration-300 shadow-xs hover:shadow-md cursor-pointer group"
+                    >
+                      <Plus size={16} strokeWidth={2.5} className="transition-transform group-hover:scale-110" />
+                      <span>Load More Products</span>
+                    </button>
+                    <p className="text-xs text-skj-muted">
+                      Showing {displayedProducts.length} of {filteredProducts.length} products
+                    </p>
+                  </div>
+                )}
+
+                {/* All products loaded indicator */}
+                {filteredProducts.length > 9 && visibleCount >= filteredProducts.length && (
+                  <div className="mt-10 mb-6 text-center">
+                    <p className="text-xs text-skj-muted font-medium bg-skj-ivory/60 border border-skj-border/60 rounded-full py-2 px-5 inline-block">
+                      ✓ All {filteredProducts.length} products loaded
+                    </p>
+                  </div>
+                )}
+              </>
             ) : (
               /* Empty state */
               <div className="text-center py-20 px-4">

@@ -21,6 +21,7 @@ export default function EditProductPage() {
   const router = useRouter();
   const { id } = useParams();
 
+  const [checkingAuth, setCheckingAuth] = useState(true);
   const [loading, setLoading] = useState(true);
   // Submit State: 'idle' | 'submitting' | 'success'
   const [submitStatus, setSubmitStatus] = useState('idle');
@@ -53,6 +54,24 @@ export default function EditProductPage() {
   const [imagePreview, setImagePreview] = useState('');
   const [uploadingImage, setUploadingImage] = useState(false);
   const [cloudinaryUrl, setCloudinaryUrl] = useState('');
+
+  // 0. Check Admin Authentication
+  useEffect(() => {
+    router.prefetch('/admin');
+    async function checkAuth() {
+      try {
+        const res = await fetch('/api/admin/check');
+        if (!res.ok) {
+          router.push('/admin/login');
+        } else {
+          setCheckingAuth(false);
+        }
+      } catch {
+        router.push('/admin/login');
+      }
+    }
+    checkAuth();
+  }, [router]);
 
   // 1. Fetch Existing Product Data & Prefetch Dashboard
   useEffect(() => {
@@ -334,7 +353,7 @@ export default function EditProductPage() {
     }
   };
 
-  if (loading) {
+  if (checkingAuth || loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <Loader2 className="w-8 h-8 text-[#C8102E] animate-spin" />

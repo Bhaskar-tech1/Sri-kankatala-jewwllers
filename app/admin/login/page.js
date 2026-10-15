@@ -1,11 +1,12 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import CLOUDINARY_IMAGES from '@/lib/images';
 
-export default function AdminLoginPage() {
+function AdminLoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -29,7 +30,9 @@ export default function AdminLoginPage() {
         throw new Error(data.error || 'Authentication failed');
       }
 
-      router.push('/admin');
+      const from = searchParams.get('from');
+      const target = from && from.startsWith('/admin') ? from : '/admin';
+      router.push(target);
       router.refresh();
     } catch (err) {
       setError(err.message);
@@ -133,3 +136,16 @@ export default function AdminLoginPage() {
     </div>
   );
 }
+
+export default function AdminLoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-[#C4B28C] flex items-center justify-center">
+        <div className="w-8 h-8 border-3 border-white border-t-transparent rounded-full animate-spin" />
+      </div>
+    }>
+      <AdminLoginForm />
+    </Suspense>
+  );
+}
+

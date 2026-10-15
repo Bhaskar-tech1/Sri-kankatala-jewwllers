@@ -26,6 +26,7 @@ export default function AdminDashboardPage() {
   const [filterAudience, setFilterAudience] = useState('all'); // all | women | men
   const [filterCategory, setFilterCategory] = useState('all'); // all | [categoryName]
   const [filterStock, setFilterStock] = useState('all');       // all | in_stock | out_of_stock
+  const [visibleCount, setVisibleCount] = useState(8);         // 8 items per load to conserve Cloudinary bandwidth
 
   // Gold & Silver Rates Modal & Confirmation States
   const [ratesModalOpen, setRatesModalOpen] = useState(false);
@@ -297,6 +298,7 @@ export default function AdminDashboardPage() {
     setFilterAudience('all');
     setFilterCategory('all');
     setFilterStock('all');
+    setVisibleCount(8);
   };
 
   const isFilterActive =
@@ -363,6 +365,16 @@ export default function AdminDashboardPage() {
       return true;
     });
   }, [products, searchQuery, filterMaterial, filterAudience, filterCategory, filterStock]);
+
+  // Reset pagination to 8 whenever search or filters change
+  useEffect(() => {
+    setVisibleCount(8);
+  }, [searchQuery, filterMaterial, filterAudience, filterCategory, filterStock]);
+
+  // Sliced products for display (loads 8 at a time to conserve Cloudinary image bandwidth)
+  const displayedProducts = useMemo(() => {
+    return filteredProducts.slice(0, visibleCount);
+  }, [filteredProducts, visibleCount]);
 
   if (checkingAuth) {
     return (
@@ -647,8 +659,11 @@ export default function AdminDashboardPage() {
         {/* Product Count Indicator */}
         <div className="flex items-center justify-between text-xs text-gray-500 px-1">
           <span>
-            Showing <strong className="text-gray-900">{filteredProducts.length}</strong> of{' '}
-            <strong className="text-gray-900">{products.length}</strong> products
+            Showing <strong className="text-gray-900">{Math.min(visibleCount, filteredProducts.length)}</strong> of{' '}
+            <strong className="text-gray-900">{filteredProducts.length}</strong> products
+            {filteredProducts.length !== products.length && (
+              <span className="text-gray-400 ml-1">({products.length} total in inventory)</span>
+            )}
           </span>
 
           <button
@@ -703,7 +718,7 @@ export default function AdminDashboardPage() {
             <>
               {/* 1. Mobile Cards View (displayed on mobile screens without sliding) */}
               <div className="block md:hidden divide-y divide-[#F0EDE6] bg-white rounded-2xl border border-[#E5E1D8] shadow-xs overflow-hidden">
-                {filteredProducts.map((product) => {
+                {displayedProducts.map((product) => {
                   const isOperating = actionLoadingId === product.id;
                   const isGold = product.material === 'gold';
                   const isInStock = product.stockStatus === 'in_stock';
@@ -851,7 +866,7 @@ export default function AdminDashboardPage() {
                   </thead>
 
                   <tbody className="divide-y divide-gray-100">
-                    {filteredProducts.map((product) => {
+                    {displayedProducts.map((product) => {
                       const isOperating = actionLoadingId === product.id;
                       const isGold = product.material === 'gold';
                       const isInStock = product.stockStatus === 'in_stock';
@@ -1006,6 +1021,33 @@ export default function AdminDashboardPage() {
                   </tbody>
                 </table>
               </div>
+
+              {/* Load More Button & Pagination Controls */}
+              {visibleCount < filteredProducts.length && (
+                <div className="p-4 sm:p-5 border-t border-[#EAE6DF] bg-[#FAF9F6]/80 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-600">
+                  <div className="flex items-center gap-2">
+                    <span className="inline-block w-2 h-2 rounded-full bg-[#8B0000]"></span>
+                    <span>
+                      Displaying <strong>{displayedProducts.length}</strong> of <strong>{filteredProducts.length}</strong> products
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setVisibleCount((prev) => prev + 8)}
+                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-white hover:bg-[#FAF9F6] border border-gray-300 hover:border-[#8B0000] text-gray-800 hover:text-[#8B0000] font-semibold text-xs rounded-xl shadow-xs transition-all cursor-pointer group"
+                  >
+                    <span>Load More (Next 8 Products)</span>
+                    <ChevronDown className="w-4 h-4 text-gray-400 group-hover:text-[#8B0000] transition-transform group-hover:translate-y-0.5" />
+                  </button>
+                </div>
+              )}
+
+              {/* All products loaded indicator */}
+              {filteredProducts.length > 8 && visibleCount >= filteredProducts.length && (
+                <div className="py-3.5 px-4 text-center border-t border-[#EAE6DF] bg-[#FAF9F6]/50 text-xs text-gray-500 font-medium">
+                  ✓ All {filteredProducts.length} products loaded
+                </div>
+              )}
             </>
           )}
         </div>

@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
+import { Mail } from 'lucide-react';
 import siteConfig from '@/lib/config';
 import CLOUDINARY_IMAGES from '@/lib/images';
 
@@ -139,8 +140,28 @@ export default function Footer() {
 
       {/* Bottom bar */}
       <div className="border-t border-white/10">
-        <div className="section-container py-4 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-white/50">
-          <p>© {currentYear} {siteConfig.businessName}. All rights reserved.</p>
+        <div className="section-container py-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-white/50 text-center sm:text-left">
+          <div>
+            <p>© {currentYear} {siteConfig.businessName}. All rights reserved.</p>
+            <p className="mt-1">
+              Developed by{' '}
+              <a
+                href="mailto:panjaabhisek57@gmail.com"
+                className="hover:text-white transition-colors inline-flex items-center gap-1"
+                title="Email Panja Abhishek"
+              >
+                Panja Abhishek <Mail size={12} />
+              </a>{' '}
+              and{' '}
+              <a
+                href="mailto:bhaskarvanjarapu207@gmail.com"
+                className="hover:text-white transition-colors inline-flex items-center gap-1"
+                title="Email Bhaskar Vanjarapu"
+              >
+                Bhaskar Vanjarapu <Mail size={12} />
+              </a>
+            </p>
+          </div>
           <p>Crafted with care for authentic Indian jewellery lovers.</p>
         </div>
       </div>

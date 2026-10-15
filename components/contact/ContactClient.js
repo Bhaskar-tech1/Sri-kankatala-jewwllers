@@ -25,7 +25,8 @@ export default function ContactClient() {
     text += `Phone: ${formData.phone}\n`;
     if (formData.email) text += `Email: ${formData.email}\n`;
     if (formData.category) text += `Interested In: ${formData.category}\n`;
-    text += `\n*Message:*\n${formData.message}`;
+    text += `\n*Message:*\n${formData.message}\n\n`;
+    text += `_This enquiry comes from www.srikankatalajewellers.in website_`;
 
     const waUrl = `https://api.whatsapp.com/send?phone=${waNumber}&text=${encodeURIComponent(text)}`;
     window.open(waUrl, '_blank');
