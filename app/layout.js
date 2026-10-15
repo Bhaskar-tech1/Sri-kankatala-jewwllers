@@ -51,7 +51,7 @@ export const metadata = {
     siteName: siteConfig.businessName,
     images: [
       {
-        url: '/SKJlogo.png',
+        url: 'https://res.cloudinary.com/i8sv3vs8/image/upload/f_auto,q_auto/v1792040219/skj/SKJlogo.png',
         width: 600,
         height: 600,
         alt: `${siteConfig.businessName} — Ravulapalem`,
@@ -62,7 +62,7 @@ export const metadata = {
     card: 'summary_large_image',
     title: `${siteConfig.businessName} | Gold & Silver Jewellery in Ravulapalem`,
     description: siteConfig.description,
-    images: ['/SKJlogo.png'],
+    images: ['https://res.cloudinary.com/i8sv3vs8/image/upload/f_auto,q_auto/v1792040219/skj/SKJlogo.png'],
   },
   robots: {
     index: true,
@@ -88,8 +88,8 @@ const storeSchema = {
   '@id': `${siteConfig.siteUrl}/#jewelrystore`,
   name: siteConfig.businessName,
   url: siteConfig.siteUrl,
-  logo: `${siteConfig.siteUrl}/SKJlogo.png`,
-  image: `${siteConfig.siteUrl}/SKJlogo.png`,
+  logo: 'https://res.cloudinary.com/i8sv3vs8/image/upload/f_auto,q_auto/v1792040219/skj/SKJlogo.png',
+  image: 'https://res.cloudinary.com/i8sv3vs8/image/upload/f_auto,q_auto/v1792040219/skj/SKJlogo.png',
   description: siteConfig.description,
   telephone: siteConfig.phone,
   priceRange: '₹₹ - ₹₹₹₹',

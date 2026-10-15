@@ -1,0 +1,252 @@
+{
+  "/icon.png": {
+    "relPath": "/icon.png",
+    "secure_url": "https://res.cloudinary.com/i8sv3vs8/image/upload/v1792040194/skj/icon.png",
+    "optimized_url": "https://res.cloudinary.com/i8sv3vs8/image/upload/f_auto,q_auto/v1792040194/skj/icon.png",
+    "public_id": "skj/icon",
+    "bytes": 1309351,
+    "format": "png",
+    "width": 1356,
+    "height": 1159
+  },
+  "/images/categories/Bangles.png": {
+    "relPath": "/images/categories/Bangles.png",
+    "secure_url": "https://res.cloudinary.com/i8sv3vs8/image/upload/v1792040196/skj/categories/Bangles.png",
+    "optimized_url": "https://res.cloudinary.com/i8sv3vs8/image/upload/f_auto,q_auto/v1792040196/skj/categories/Bangles.png",
+    "public_id": "skj/categories/Bangles",
+    "bytes": 2424475,
+    "format": "png",
+    "width": 1254,
+    "height": 1254
+  },
+  "/images/categories/Bracelets.jpg": {
+    "relPath": "/images/categories/Bracelets.jpg",
+    "secure_url": "https://res.cloudinary.com/i8sv3vs8/image/upload/v1792040197/skj/categories/Bracelets.jpg",
+    "optimized_url": "https://res.cloudinary.com/i8sv3vs8/image/upload/f_auto,q_auto/v1792040197/skj/categories/Bracelets.jpg",
+    "public_id": "skj/categories/Bracelets",
+    "bytes": 1531275,
+    "format": "jpg",
+    "width": 3395,
+    "height": 3395
+  },
+  "/images/categories/Earrings.jpg": {
+    "relPath": "/images/categories/Earrings.jpg",
+    "secure_url": "https://res.cloudinary.com/i8sv3vs8/image/upload/v1792040198/skj/categories/Earrings.jpg",
+    "optimized_url": "https://res.cloudinary.com/i8sv3vs8/image/upload/f_auto,q_auto/v1792040198/skj/categories/Earrings.jpg",
+    "public_id": "skj/categories/Earrings",
+    "bytes": 124521,
+    "format": "jpg",
+    "width": 1024,
+    "height": 1024
+  },
+  "/images/categories/Harams.jpg": {
+    "relPath": "/images/categories/Harams.jpg",
+    "secure_url": "https://res.cloudinary.com/i8sv3vs8/image/upload/v1792040198/skj/categories/Harams.jpg",
+    "optimized_url": "https://res.cloudinary.com/i8sv3vs8/image/upload/f_auto,q_auto/v1792040198/skj/categories/Harams.jpg",
+    "public_id": "skj/categories/Harams",
+    "bytes": 61085,
+    "format": "jpg",
+    "width": 720,
+    "height": 720
+  },
+  "/images/categories/Jumkas.jpg": {
+    "relPath": "/images/categories/Jumkas.jpg",
+    "secure_url": "https://res.cloudinary.com/i8sv3vs8/image/upload/v1792040199/skj/categories/Jumkas.jpg",
+    "optimized_url": "https://res.cloudinary.com/i8sv3vs8/image/upload/f_auto,q_auto/v1792040199/skj/categories/Jumkas.jpg",
+    "public_id": "skj/categories/Jumkas",
+    "bytes": 148770,
+    "format": "jpg",
+    "width": 1024,
+    "height": 1024
+  },
+  "/images/categories/Mangalasustras.jpg": {
+    "relPath": "/images/categories/Mangalasustras.jpg",
+    "secure_url": "https://res.cloudinary.com/i8sv3vs8/image/upload/v1792040200/skj/categories/Mangalasustras.jpg",
+    "optimized_url": "https://res.cloudinary.com/i8sv3vs8/image/upload/f_auto,q_auto/v1792040200/skj/categories/Mangalasustras.jpg",
+    "public_id": "skj/categories/Mangalasustras",
+    "bytes": 217319,
+    "format": "jpg",
+    "width": 3024,
+    "height": 4032
+  },
+  "/images/categories/Necklace1.jpg": {
+    "relPath": "/images/categories/Necklace1.jpg",
+    "secure_url": "https://res.cloudinary.com/i8sv3vs8/image/upload/v1792040201/skj/categories/Necklace1.jpg",
+    "optimized_url": "https://res.cloudinary.com/i8sv3vs8/image/upload/f_auto,q_auto/v1792040201/skj/categories/Necklace1.jpg",
+    "public_id": "skj/categories/Necklace1",
+    "bytes": 203691,
+    "format": "jpg",
+    "width": 1199,
+    "height": 1600
+  },
+  "/images/categories/Necklaces.png": {
+    "relPath": "/images/categories/Necklaces.png",
+    "secure_url": "https://res.cloudinary.com/i8sv3vs8/image/upload/v1792040202/skj/categories/Necklaces.jpg",
+    "optimized_url": "https://res.cloudinary.com/i8sv3vs8/image/upload/f_auto,q_auto/v1792040202/skj/categories/Necklaces.jpg",
+    "public_id": "skj/categories/Necklaces",
+    "bytes": 61085,
+    "format": "jpg",
+    "width": 720,
+    "height": 720
+  },
+  "/images/categories/Rings.jpg": {
+    "relPath": "/images/categories/Rings.jpg",
+    "secure_url": "https://res.cloudinary.com/i8sv3vs8/image/upload/v1792040203/skj/categories/Rings.jpg",
+    "optimized_url": "https://res.cloudinary.com/i8sv3vs8/image/upload/f_auto,q_auto/v1792040203/skj/categories/Rings.jpg",
+    "public_id": "skj/categories/Rings",
+    "bytes": 191576,
+    "format": "jpg",
+    "width": 1000,
+    "height": 1000
+  },
+  "/images/hero/hero_bridal_gold.png": {
+    "relPath": "/images/hero/hero_bridal_gold.png",
+    "secure_url": "https://res.cloudinary.com/i8sv3vs8/image/upload/v1792040204/skj/hero/hero_bridal_gold.png",
+    "optimized_url": "https://res.cloudinary.com/i8sv3vs8/image/upload/f_auto,q_auto/v1792040204/skj/hero/hero_bridal_gold.png",
+    "public_id": "skj/hero/hero_bridal_gold",
+    "bytes": 2118978,
+    "format": "png",
+    "width": 2048,
+    "height": 768
+  },
+  "/images/hero/hero_bridal_gold_1791637796095.jpg": {
+    "relPath": "/images/hero/hero_bridal_gold_1791637796095.jpg",
+    "secure_url": "https://res.cloudinary.com/i8sv3vs8/image/upload/v1792040205/skj/hero/hero_bridal_gold_1791637796095.jpg",
+    "optimized_url": "https://res.cloudinary.com/i8sv3vs8/image/upload/f_auto,q_auto/v1792040205/skj/hero/hero_bridal_gold_1791637796095.jpg",
+    "public_id": "skj/hero/hero_bridal_gold_1791637796095",
+    "bytes": 715515,
+    "format": "jpg",
+    "width": 1376,
+    "height": 768
+  },
+  "/images/hero/hero_bridal_gold_mobile.png": {
+    "relPath": "/images/hero/hero_bridal_gold_mobile.png",
+    "secure_url": "https://res.cloudinary.com/i8sv3vs8/image/upload/v1792040206/skj/hero/hero_bridal_gold_mobile.png",
+    "optimized_url": "https://res.cloudinary.com/i8sv3vs8/image/upload/f_auto,q_auto/v1792040206/skj/hero/hero_bridal_gold_mobile.png",
+    "public_id": "skj/hero/hero_bridal_gold_mobile",
+    "bytes": 2270015,
+    "format": "png",
+    "width": 1024,
+    "height": 1536
+  },
+  "/images/hero/hero_mens_collection.png": {
+    "relPath": "/images/hero/hero_mens_collection.png",
+    "secure_url": "https://res.cloudinary.com/i8sv3vs8/image/upload/v1792040207/skj/hero/hero_mens_collection.png",
+    "optimized_url": "https://res.cloudinary.com/i8sv3vs8/image/upload/f_auto,q_auto/v1792040207/skj/hero/hero_mens_collection.png",
+    "public_id": "skj/hero/hero_mens_collection",
+    "bytes": 2148552,
+    "format": "png",
+    "width": 2048,
+    "height": 768
+  },
+  "/images/hero/hero_mens_collection_1791637835648.jpg": {
+    "relPath": "/images/hero/hero_mens_collection_1791637835648.jpg",
+    "secure_url": "https://res.cloudinary.com/i8sv3vs8/image/upload/v1792040208/skj/hero/hero_mens_collection_1791637835648.jpg",
+    "optimized_url": "https://res.cloudinary.com/i8sv3vs8/image/upload/f_auto,q_auto/v1792040208/skj/hero/hero_mens_collection_1791637835648.jpg",
+    "public_id": "skj/hero/hero_mens_collection_1791637835648",
+    "bytes": 871353,
+    "format": "jpg",
+    "width": 1376,
+    "height": 768
+  },
+  "/images/hero/hero_mens_collection_mobile.png": {
+    "relPath": "/images/hero/hero_mens_collection_mobile.png",
+    "secure_url": "https://res.cloudinary.com/i8sv3vs8/image/upload/v1792040210/skj/hero/hero_mens_collection_mobile.png",
+    "optimized_url": "https://res.cloudinary.com/i8sv3vs8/image/upload/f_auto,q_auto/v1792040210/skj/hero/hero_mens_collection_mobile.png",
+    "public_id": "skj/hero/hero_mens_collection_mobile",
+    "bytes": 2209926,
+    "format": "png",
+    "width": 1024,
+    "height": 1536
+  },
+  "/images/hero/hero_sterling_silver.png": {
+    "relPath": "/images/hero/hero_sterling_silver.png",
+    "secure_url": "https://res.cloudinary.com/i8sv3vs8/image/upload/v1792040212/skj/hero/hero_sterling_silver.png",
+    "optimized_url": "https://res.cloudinary.com/i8sv3vs8/image/upload/f_auto,q_auto/v1792040212/skj/hero/hero_sterling_silver.png",
+    "public_id": "skj/hero/hero_sterling_silver",
+    "bytes": 2518942,
+    "format": "png",
+    "width": 1967,
+    "height": 800
+  },
+  "/images/hero/hero_sterling_silver_1791637808752.jpg": {
+    "relPath": "/images/hero/hero_sterling_silver_1791637808752.jpg",
+    "secure_url": "https://res.cloudinary.com/i8sv3vs8/image/upload/v1792040213/skj/hero/hero_sterling_silver_1791637808752.jpg",
+    "optimized_url": "https://res.cloudinary.com/i8sv3vs8/image/upload/f_auto,q_auto/v1792040213/skj/hero/hero_sterling_silver_1791637808752.jpg",
+    "public_id": "skj/hero/hero_sterling_silver_1791637808752",
+    "bytes": 697004,
+    "format": "jpg",
+    "width": 1376,
+    "height": 768
+  },
+  "/images/hero/hero_sterling_silver_mobile.png": {
+    "relPath": "/images/hero/hero_sterling_silver_mobile.png",
+    "secure_url": "https://res.cloudinary.com/i8sv3vs8/image/upload/v1792040214/skj/hero/hero_sterling_silver_mobile.png",
+    "optimized_url": "https://res.cloudinary.com/i8sv3vs8/image/upload/f_auto,q_auto/v1792040214/skj/hero/hero_sterling_silver_mobile.png",
+    "public_id": "skj/hero/hero_sterling_silver_mobile",
+    "bytes": 2414558,
+    "format": "png",
+    "width": 1024,
+    "height": 1536
+  },
+  "/images/hero/hero_temple_jewellery.png": {
+    "relPath": "/images/hero/hero_temple_jewellery.png",
+    "secure_url": "https://res.cloudinary.com/i8sv3vs8/image/upload/v1792040215/skj/hero/hero_temple_jewellery.png",
+    "optimized_url": "https://res.cloudinary.com/i8sv3vs8/image/upload/f_auto,q_auto/v1792040215/skj/hero/hero_temple_jewellery.png",
+    "public_id": "skj/hero/hero_temple_jewellery",
+    "bytes": 2377946,
+    "format": "png",
+    "width": 1933,
+    "height": 813
+  },
+  "/images/hero/hero_temple_jewellery_1791637822451.jpg": {
+    "relPath": "/images/hero/hero_temple_jewellery_1791637822451.jpg",
+    "secure_url": "https://res.cloudinary.com/i8sv3vs8/image/upload/v1792040216/skj/hero/hero_temple_jewellery_1791637822451.jpg",
+    "optimized_url": "https://res.cloudinary.com/i8sv3vs8/image/upload/f_auto,q_auto/v1792040216/skj/hero/hero_temple_jewellery_1791637822451.jpg",
+    "public_id": "skj/hero/hero_temple_jewellery_1791637822451",
+    "bytes": 1104526,
+    "format": "jpg",
+    "width": 1376,
+    "height": 768
+  },
+  "/images/hero/hero_temple_jewellery_mobile.png": {
+    "relPath": "/images/hero/hero_temple_jewellery_mobile.png",
+    "secure_url": "https://res.cloudinary.com/i8sv3vs8/image/upload/v1792040217/skj/hero/hero_temple_jewellery_mobile.png",
+    "optimized_url": "https://res.cloudinary.com/i8sv3vs8/image/upload/f_auto,q_auto/v1792040217/skj/hero/hero_temple_jewellery_mobile.png",
+    "public_id": "skj/hero/hero_temple_jewellery_mobile",
+    "bytes": 2252492,
+    "format": "png",
+    "width": 941,
+    "height": 1672
+  },
+  "/images/skjshop.jpg": {
+    "relPath": "/images/skjshop.jpg",
+    "secure_url": "https://res.cloudinary.com/i8sv3vs8/image/upload/v1792040217/skj/skjshop.jpg",
+    "optimized_url": "https://res.cloudinary.com/i8sv3vs8/image/upload/f_auto,q_auto/v1792040217/skj/skjshop.jpg",
+    "public_id": "skj/skjshop",
+    "bytes": 127278,
+    "format": "jpg",
+    "width": 470,
+    "height": 987
+  },
+  "/images/skjshop1.png": {
+    "relPath": "/images/skjshop1.png",
+    "secure_url": "https://res.cloudinary.com/i8sv3vs8/image/upload/v1792040218/skj/skjshop1.png",
+    "optimized_url": "https://res.cloudinary.com/i8sv3vs8/image/upload/f_auto,q_auto/v1792040218/skj/skjshop1.png",
+    "public_id": "skj/skjshop1",
+    "bytes": 2208939,
+    "format": "png",
+    "width": 1254,
+    "height": 1254
+  },
+  "/SKJlogo.png": {
+    "relPath": "/SKJlogo.png",
+    "secure_url": "https://res.cloudinary.com/i8sv3vs8/image/upload/v1792040219/skj/SKJlogo.png",
+    "optimized_url": "https://res.cloudinary.com/i8sv3vs8/image/upload/f_auto,q_auto/v1792040219/skj/SKJlogo.png",
+    "public_id": "skj/SKJlogo",
+    "bytes": 1309351,
+    "format": "png",
+    "width": 1356,
+    "height": 1159
+  }
+}

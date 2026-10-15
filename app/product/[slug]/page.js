@@ -1,6 +1,7 @@
 import { getAllProducts, getProductBySlug } from '@/lib/api';
 import ProductDetailClient from '@/components/product/ProductDetailClient';
 import { notFound } from 'next/navigation';
+import CLOUDINARY_IMAGES from '@/lib/images';
 
 export const dynamic = 'force-dynamic';
 
@@ -26,7 +27,7 @@ export async function generateMetadata({ params }) {
   const primaryImage =
     Array.isArray(product.images) && product.images.length > 0
       ? product.images[0]
-      : '/SKJlogo.png';
+      : CLOUDINARY_IMAGES.logo;
 
   const title = `${product.name} | Sri Kankatala Jewellers`;
   const description =
@@ -76,7 +77,7 @@ export default async function ProductPage({ params }) {
   const primaryImage =
     Array.isArray(product.images) && product.images.length > 0
       ? product.images[0]
-      : `${siteConfig.siteUrl}/SKJlogo.png`;
+      : CLOUDINARY_IMAGES.logo;
 
   const materialLabel = product.material === 'silver' ? 'Silver' : 'Gold';
   const audienceRoute = product.audience === 'men' ? 'men' : 'women';

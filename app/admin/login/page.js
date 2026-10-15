@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import CLOUDINARY_IMAGES from '@/lib/images';
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -52,7 +53,7 @@ export default function AdminLoginPage() {
               className="rounded-full overflow-hidden flex items-center justify-center bg-white shadow-xs border border-stone-200 flex-shrink-0"
             >
               <img
-                src="/SKJlogo.png"
+                src={CLOUDINARY_IMAGES.logo}
                 alt="Sri Kankatala Jewellers"
                 style={{ width: '64px', height: '64px', maxWidth: '64px', maxHeight: '64px', objectFit: 'contain' }}
                 className="block"

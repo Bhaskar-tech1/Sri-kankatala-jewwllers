@@ -21,21 +21,23 @@ const categoryRouteMap = {
   Watches: '/gold/men',
 };
 
+import CLOUDINARY_IMAGES from '@/lib/images';
+
 // Select featured categories for homepage display
 const featuredCategories = categories.filter((c) =>
   ['Necklaces', 'Harams', 'Jhumkas', 'Bangles', 'Rings', 'Bracelets', 'Mangalsutras', 'Earrings'].includes(c.name)
 );
 
-// Image URLs per category
+// Image URLs per category (served via Cloudinary CDN with f_auto,q_auto)
 const categoryImages = {
-  Necklaces: '/images/categories/Necklace1.jpg',
-  Harams: '/images/categories/Harams.jpg',
-  Earrings: '/images/categories/Earrings.jpg',
-  Jhumkas: '/images/categories/Jumkas.jpg',
-  Rings: '/images/categories/Rings.jpg',
-  Bangles: '/images/categories/Bangles.png',
-  Bracelets: '/images/categories/Bracelets.jpg',
-  Mangalsutras: '/images/categories/Mangalasustras.jpg',
+  Necklaces: CLOUDINARY_IMAGES.categories.Necklaces,
+  Harams: CLOUDINARY_IMAGES.categories.Harams,
+  Earrings: CLOUDINARY_IMAGES.categories.Earrings,
+  Jhumkas: CLOUDINARY_IMAGES.categories.Jumkas,
+  Rings: CLOUDINARY_IMAGES.categories.Rings,
+  Bangles: CLOUDINARY_IMAGES.categories.Bangles,
+  Bracelets: CLOUDINARY_IMAGES.categories.Bracelets,
+  Mangalsutras: CLOUDINARY_IMAGES.categories.Mangalasustras,
 };
 
 export default function ShopByCategory() {

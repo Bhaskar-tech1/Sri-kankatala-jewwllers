@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { formatPrice } from '@/lib/utils';
 import { DEFAULT_CATEGORIES } from '@/lib/categories';
+import CLOUDINARY_IMAGES from '@/lib/images';
 
 export default function AdminDashboardPage() {
   const router = useRouter();
@@ -383,7 +384,7 @@ export default function AdminDashboardPage() {
                 className="rounded-full overflow-hidden flex items-center justify-center bg-white shadow-xs border border-stone-200 flex-shrink-0"
               >
                 <img
-                  src="/SKJlogo.png"
+                  src={CLOUDINARY_IMAGES.logo}
                   alt="SKJ Logo"
                   style={{ width: '40px', height: '40px', maxWidth: '40px', maxHeight: '40px', objectFit: 'contain' }}
                   className="block"
@@ -706,7 +707,7 @@ export default function AdminDashboardPage() {
                   const isOperating = actionLoadingId === product.id;
                   const isGold = product.material === 'gold';
                   const isInStock = product.stockStatus === 'in_stock';
-                  const mainImage = product.images?.[0] || '/images/categories/Necklaces.png';
+                  const mainImage = product.images?.[0] || CLOUDINARY_IMAGES.categories.Necklaces;
 
                   return (
                     <div key={product.id} className="p-4 space-y-3">
@@ -854,7 +855,7 @@ export default function AdminDashboardPage() {
                       const isOperating = actionLoadingId === product.id;
                       const isGold = product.material === 'gold';
                       const isInStock = product.stockStatus === 'in_stock';
-                      const mainImage = product.images?.[0] || '/images/categories/Necklaces.png';
+                      const mainImage = product.images?.[0] || CLOUDINARY_IMAGES.categories.Necklaces;
 
                       return (
                         <tr

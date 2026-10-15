@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { ShoppingBag, Menu, X, ChevronDown, ChevronRight } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
+import CLOUDINARY_IMAGES from '@/lib/images';
 
 const BANNER_MESSAGES = [
   "Timeless Tradition. Trusted Craftsmanship.",
@@ -135,7 +136,7 @@ export default function Navbar() {
               aria-label="Sri Kankatala Jewellers — Home"
             >
               <Image
-                src="/SKJlogo.png"
+                src={CLOUDINARY_IMAGES.logo}
                 alt="Sri Kankatala Jewellers Logo"
                 width={scrolled ? 48 : 60}
                 height={scrolled ? 48 : 60}
@@ -263,7 +264,7 @@ export default function Navbar() {
             <div className="flex items-center justify-between px-5 py-4 border-b border-skj-border">
               <div className="flex items-center gap-2.5">
                 <Image
-                  src="/SKJlogo.png"
+                  src={CLOUDINARY_IMAGES.logo}
                   alt="Sri Kankatala Jewellers"
                   width={40}
                   height={40}

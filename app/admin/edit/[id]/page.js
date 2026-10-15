@@ -15,6 +15,7 @@ import {
   calculateProductPrice,
 } from '@/lib/pricing';
 import { DEFAULT_CATEGORIES } from '@/lib/categories';
+import CLOUDINARY_IMAGES from '@/lib/images';
 
 export default function EditProductPage() {
   const router = useRouter();
@@ -371,7 +372,7 @@ export default function EditProductPage() {
                 className="rounded-full overflow-hidden flex items-center justify-center bg-white shadow-xs border border-gray-100 flex-shrink-0"
               >
                 <img
-                  src="/SKJlogo.png"
+                  src={CLOUDINARY_IMAGES.logo}
                   alt="SKJ Logo"
                   style={{ width: '38px', height: '38px', maxWidth: '38px', maxHeight: '38px', objectFit: 'contain' }}
                   className="block"

@@ -9,12 +9,13 @@ import { gsap } from 'gsap';
 import 'swiper/css';
 import 'swiper/css/pagination';
 import 'swiper/css/effect-fade';
+import CLOUDINARY_IMAGES from '@/lib/images';
 
 const slides = [
   {
     id: 1,
-    bg: 'linear-gradient(to right, rgba(20, 18, 15, 0.75) 0%, rgba(20, 18, 15, 0.3) 50%, rgba(20, 18, 15, 0) 100%), url("/images/hero/hero_bridal_gold.png")',
-    bgMobile: 'linear-gradient(to top, rgba(20, 18, 15, 0.9) 0%, rgba(20, 18, 15, 0.45) 50%, rgba(20, 18, 15, 0.6) 100%), url("/images/hero/hero_bridal_gold_mobile.png")',
+    bg: `linear-gradient(to right, rgba(20, 18, 15, 0.75) 0%, rgba(20, 18, 15, 0.3) 50%, rgba(20, 18, 15, 0) 100%), url("${CLOUDINARY_IMAGES.hero.bridalGold}")`,
+    bgMobile: `linear-gradient(to top, rgba(20, 18, 15, 0.9) 0%, rgba(20, 18, 15, 0.45) 50%, rgba(20, 18, 15, 0.6) 100%), url("${CLOUDINARY_IMAGES.hero.bridalGoldMobile}")`,
     tagline: 'Timeless Elegance',
     headline: 'Bridal Gold\nCollections',
     description: 'Discover exquisite handcrafted gold jewellery for the most special day of your life.',
@@ -25,8 +26,8 @@ const slides = [
   },
   {
     id: 2,
-    bg: 'linear-gradient(to right, rgba(20, 18, 15, 0.8) 0%, rgba(20, 18, 15, 0.35) 50%, rgba(20, 18, 15, 0) 100%), url("/images/hero/hero_sterling_silver.png")',
-    bgMobile: 'linear-gradient(to top, rgba(20, 18, 15, 0.9) 0%, rgba(20, 18, 15, 0.45) 50%, rgba(20, 18, 15, 0.6) 100%), url("/images/hero/hero_sterling_silver_mobile.png")',
+    bg: `linear-gradient(to right, rgba(20, 18, 15, 0.8) 0%, rgba(20, 18, 15, 0.35) 50%, rgba(20, 18, 15, 0) 100%), url("${CLOUDINARY_IMAGES.hero.sterlingSilver}")`,
+    bgMobile: `linear-gradient(to top, rgba(20, 18, 15, 0.9) 0%, rgba(20, 18, 15, 0.45) 50%, rgba(20, 18, 15, 0.6) 100%), url("${CLOUDINARY_IMAGES.hero.sterlingSilverMobile}")`,
     tagline: 'Pure Craftsmanship',
     headline: 'Sterling Silver\nMasterpieces',
     description: 'Handpicked 925 sterling silver jewellery that blends tradition with contemporary design.',
@@ -37,8 +38,8 @@ const slides = [
   },
   {
     id: 3,
-    bg: 'linear-gradient(to right, rgba(20, 18, 15, 0.75) 0%, rgba(20, 18, 15, 0.3) 50%, rgba(20, 18, 15, 0) 100%), url("/images/hero/hero_temple_jewellery.png")',
-    bgMobile: 'linear-gradient(to top, rgba(20, 18, 15, 0.9) 0%, rgba(20, 18, 15, 0.45) 50%, rgba(20, 18, 15, 0.6) 100%), url("/images/hero/hero_temple_jewellery_mobile.png")',
+    bg: `linear-gradient(to right, rgba(20, 18, 15, 0.75) 0%, rgba(20, 18, 15, 0.3) 50%, rgba(20, 18, 15, 0) 100%), url("${CLOUDINARY_IMAGES.hero.templeJewellery}")`,
+    bgMobile: `linear-gradient(to top, rgba(20, 18, 15, 0.9) 0%, rgba(20, 18, 15, 0.45) 50%, rgba(20, 18, 15, 0.6) 100%), url("${CLOUDINARY_IMAGES.hero.templeJewelleryMobile}")`,
     tagline: 'Heritage & Tradition',
     headline: 'Temple\nJewellery',
     description: 'Sacred designs inspired by South Indian temple architecture, crafted in 22K gold.',
@@ -49,8 +50,8 @@ const slides = [
   },
   {
     id: 4,
-    bg: 'linear-gradient(to right, rgba(20, 18, 15, 0.8) 0%, rgba(20, 18, 15, 0.35) 50%, rgba(20, 18, 15, 0) 100%), url("/images/hero/hero_mens_collection.png")',
-    bgMobile: 'linear-gradient(to top, rgba(20, 18, 15, 0.9) 0%, rgba(20, 18, 15, 0.45) 50%, rgba(20, 18, 15, 0.6) 100%), url("/images/hero/hero_mens_collection_mobile.png")',
+    bg: `linear-gradient(to right, rgba(20, 18, 15, 0.8) 0%, rgba(20, 18, 15, 0.35) 50%, rgba(20, 18, 15, 0) 100%), url("${CLOUDINARY_IMAGES.hero.mensCollection}")`,
+    bgMobile: `linear-gradient(to top, rgba(20, 18, 15, 0.9) 0%, rgba(20, 18, 15, 0.45) 50%, rgba(20, 18, 15, 0.6) 100%), url("${CLOUDINARY_IMAGES.hero.mensCollectionMobile}")`,
     tagline: 'For the Modern Man',
     headline: 'Men\'s\nCollection',
     description: 'Bold rings, bracelets, chains and watches crafted for the distinguished gentleman.',

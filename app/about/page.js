@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { MapPin, ArrowRight } from 'lucide-react';
+import CLOUDINARY_IMAGES from '@/lib/images';
 
 export const metadata = {
   title: 'About Sri Kankatala Jewellers | Ravulapalem',
@@ -52,7 +53,7 @@ export default function AboutPage() {
             {/* Hero Image */}
             <div className="relative w-full h-[350px] lg:h-[420px] max-w-sm lg:max-w-md mx-auto lg:ml-auto rounded-2xl overflow-hidden shadow-2xl border-4 border-white order-1 lg:order-2">
               <Image
-                src="/images/skjshop1.png"
+                src={CLOUDINARY_IMAGES.shop1}
                 alt="Sri Kankatala Jewellers Store"
                 fill
                 className="object-cover object-top"
@@ -88,7 +89,7 @@ export default function AboutPage() {
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
             <div className="relative aspect-[4/3] rounded-3xl overflow-hidden shadow-xl border border-skj-charcoal/10">
               <Image
-                src="/images/hero/hero_temple_jewellery_1791637822451.jpg"
+                src={CLOUDINARY_IMAGES.hero.templeJewelleryFeatured}
                 alt="Traditional temple jewellery highlighting Indian heritage"
                 fill
                 className="object-cover"
@@ -132,7 +133,7 @@ export default function AboutPage() {
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             <Link href="/gold/women?category=Necklaces" className="group block relative aspect-[5/4] overflow-hidden rounded-2xl bg-skj-deep-olive">
               <Image
-                src="/images/hero/hero_bridal_gold_1791637796095.jpg"
+                src={CLOUDINARY_IMAGES.hero.bridalGoldFeatured}
                 alt="Gold Necklaces"
                 fill
                 className="object-cover opacity-80 group-hover:scale-105 group-hover:opacity-100 transition-all duration-700"
@@ -147,7 +148,7 @@ export default function AboutPage() {
             
             <Link href="/silver/men" className="group block relative aspect-[5/4] overflow-hidden rounded-2xl bg-skj-deep-olive">
               <Image
-                src="/images/hero/hero_mens_collection_1791637835648.jpg"
+                src={CLOUDINARY_IMAGES.hero.mensCollectionFeatured}
                 alt="Men's Silver Collection"
                 fill
                 className="object-cover opacity-80 group-hover:scale-105 group-hover:opacity-100 transition-all duration-700"
@@ -162,7 +163,7 @@ export default function AboutPage() {
 
             <Link href="/silver/women" className="group block relative aspect-[5/4] overflow-hidden rounded-2xl bg-skj-deep-olive sm:hidden lg:block">
               <Image
-                src="/images/hero/hero_sterling_silver_1791637808752.jpg"
+                src={CLOUDINARY_IMAGES.hero.sterlingSilverFeatured}
                 alt="Sterling Silver Masterpieces"
                 fill
                 className="object-cover opacity-80 group-hover:scale-105 group-hover:opacity-100 transition-all duration-700"

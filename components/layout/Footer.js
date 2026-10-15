@@ -4,6 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import siteConfig from '@/lib/config';
+import CLOUDINARY_IMAGES from '@/lib/images';
 
 const footerCollections = [
   { label: 'Gold for Women', href: '/gold/women' },
@@ -45,7 +46,7 @@ export default function Footer() {
           <div className="sm:col-span-2 lg:col-span-1">
             <Link href="/" className="inline-block mb-4">
               <Image
-                src="/SKJlogo.png"
+                src={CLOUDINARY_IMAGES.logo}
                 alt="Sri Kankatala Jewellers"
                 width={72}
                 height={72}
