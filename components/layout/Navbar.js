@@ -185,7 +185,7 @@ export default function Navbar() {
             {/* Logo & Brand Name */}
             <Link
               href="/"
-              className="flex items-center gap-2 sm:gap-3.5 flex-shrink min-w-0 group"
+              className="flex items-center gap-2 sm:gap-3.5 flex-shrink min-w-0 mr-2 sm:mr-4 group"
               aria-label="Sri Kankatala Jewellers — Home"
             >
               <Image
@@ -193,11 +193,11 @@ export default function Navbar() {
                 alt="Sri Kankatala Jewellers Logo"
                 width={scrolled ? 48 : 60}
                 height={scrolled ? 48 : 60}
-                className="transition-all duration-300 w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 object-contain flex-shrink-0"
+                className="transition-all duration-300 w-9 h-9 sm:w-12 sm:h-12 lg:w-14 lg:h-14 object-contain flex-shrink-0"
                 priority
               />
               <span
-                className="font-serif font-bold text-skj-charcoal text-[15px] sm:text-lg lg:text-xl tracking-tight group-hover:text-skj-olive transition-colors whitespace-nowrap truncate"
+                className="font-serif font-bold text-skj-charcoal text-[13.5px] sm:text-lg lg:text-xl tracking-tight group-hover:text-skj-olive transition-colors whitespace-nowrap truncate"
                 style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
               >
                 Sri Kankatala Jewellers
@@ -267,7 +267,7 @@ export default function Navbar() {
             </ul>
 
             {/* Right actions: Today's Rates, Cart, Mobile menu */}
-            <div className="flex items-center gap-1.5 sm:gap-2 lg:gap-3 flex-shrink-0">
+            <div className="flex items-center gap-1.5 sm:gap-2 lg:gap-3 flex-shrink-0 ml-auto">
               {/* Today's Rates Button & Pop-up */}
               <div className="relative">
                 <button
@@ -361,49 +361,6 @@ export default function Navbar() {
                 aria-label="Close menu"
               >
                 <X size={22} />
-              </button>
-            </div>
-
-            {/* Quick Rates Card in Mobile Drawer */}
-            <div className="mx-4 mt-3 mb-1 p-3 bg-gradient-to-br from-amber-50/90 via-white to-amber-50/40 rounded-2xl border border-amber-200/80 shadow-xs">
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                  <span className="text-[11px] font-bold text-amber-950 uppercase tracking-wide">
-                    Today&apos;s Live Rates
-                  </span>
-                </div>
-                <span className="text-[10px] text-stone-500 font-medium">Per 1g</span>
-              </div>
-              <div className="grid grid-cols-3 gap-1.5 text-center py-0.5">
-                <div className="p-1.5 bg-white rounded-xl border border-amber-100">
-                  <span className="text-[9px] text-stone-500 font-semibold block leading-tight">22K Gold</span>
-                  <span className="text-[11px] font-extrabold text-[#242A0B]">
-                    ₹{Number(rates?.gold22k || 0).toLocaleString('en-IN')}
-                  </span>
-                </div>
-                <div className="p-1.5 bg-white rounded-xl border border-amber-100">
-                  <span className="text-[9px] text-stone-500 font-semibold block leading-tight">24K Gold</span>
-                  <span className="text-[11px] font-extrabold text-[#242A0B]">
-                    ₹{Number(rates?.gold24k || 0).toLocaleString('en-IN')}
-                  </span>
-                </div>
-                <div className="p-1.5 bg-white rounded-xl border border-slate-200">
-                  <span className="text-[9px] text-slate-500 font-semibold block leading-tight">Silver (1g)</span>
-                  <span className="text-[11px] font-extrabold text-slate-900">
-                    ₹{Number(rates?.silver925 || 0).toLocaleString('en-IN')}
-                  </span>
-                </div>
-              </div>
-              <button
-                onClick={() => {
-                  setMobileOpen(false);
-                  setRatesModalOpen(true);
-                }}
-                className="w-full mt-2 py-1.5 bg-[#3B4210] hover:bg-[#242A0B] text-white text-[11px] font-semibold rounded-lg text-center transition-colors flex items-center justify-center gap-1 cursor-pointer"
-              >
-                <Coins size={12} />
-                <span>View Full Rates</span>
               </button>
             </div>
 
