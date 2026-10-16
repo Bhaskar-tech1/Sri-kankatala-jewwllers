@@ -4,9 +4,13 @@ import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
-import { ShoppingBag, Menu, X, ChevronDown, ChevronRight } from 'lucide-react';
+import { ShoppingBag, Menu, X, ChevronDown, ChevronRight, Coins } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import CLOUDINARY_IMAGES from '@/lib/images';
+import TodayRatesModal from '@/components/layout/TodayRatesModal';
+import { db } from '@/lib/firebase';
+import { doc, onSnapshot } from 'firebase/firestore';
+import { DEFAULT_RATES } from '@/lib/pricing';
 
 const BANNER_MESSAGES = [
   "Timeless Tradition. Trusted Craftsmanship.",
@@ -44,8 +48,57 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [openDropdown, setOpenDropdown] = useState(null);
   const [bannerIndex, setBannerIndex] = useState(0);
+  const [ratesModalOpen, setRatesModalOpen] = useState(false);
+  const [rates, setRates] = useState(DEFAULT_RATES);
   const dropdownRef = useRef(null);
   const mobileMenuRef = useRef(null);
+
+  // Subscribe to real-time daily gold & silver rates from Firestore
+  useEffect(() => {
+    let unsubscribe = () => {};
+
+    const fetchRatesFromApi = async () => {
+      try {
+        const res = await fetch('/api/gold-rates');
+        if (res.ok) {
+          const json = await res.json();
+          if (json?.rates) {
+            setRates((prev) => ({ ...prev, ...json.rates }));
+          }
+        }
+      } catch (err) {
+        console.error('Failed to fetch daily rates from API:', err);
+      }
+    };
+
+    try {
+      if (db) {
+        const docRef = doc(db, 'settings', 'goldRates');
+        unsubscribe = onSnapshot(
+          docRef,
+          (snap) => {
+            if (snap.exists()) {
+              setRates((prev) => ({ ...prev, ...snap.data() }));
+            } else {
+              fetchRatesFromApi();
+            }
+          },
+          (err) => {
+            console.warn('Realtime gold rates listener error, falling back to API:', err.message);
+            fetchRatesFromApi();
+          }
+        );
+      } else {
+        fetchRatesFromApi();
+      }
+    } catch (e) {
+      fetchRatesFromApi();
+    }
+
+    return () => {
+      if (typeof unsubscribe === 'function') unsubscribe();
+    };
+  }, []);
 
   // Close mobile menu on route change
   useEffect(() => {
@@ -213,8 +266,33 @@ export default function Navbar() {
               )}
             </ul>
 
-            {/* Right actions: Cart, Mobile menu */}
+            {/* Right actions: Today's Rates, Cart, Mobile menu */}
             <div className="flex items-center gap-1.5 sm:gap-2 lg:gap-3 flex-shrink-0">
+              {/* Today's Rates Button & Pop-up */}
+              <div className="relative">
+                <button
+                  onClick={() => setRatesModalOpen((prev) => !prev)}
+                  className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full border border-amber-300/90 bg-gradient-to-r from-amber-50 to-amber-100/70 hover:from-amber-100 hover:to-amber-200/80 text-amber-950 text-xs font-semibold shadow-xs hover:shadow-sm transition-all cursor-pointer group flex-shrink-0"
+                  title="View Today's Gold & Silver Rates"
+                  aria-label="View Today's Gold & Silver Rates"
+                  aria-expanded={ratesModalOpen}
+                >
+                  <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-emerald-500 animate-pulse flex-shrink-0" />
+                  <Coins className="w-3.5 h-3.5 text-amber-700 group-hover:scale-110 transition-transform flex-shrink-0" />
+                  <span className="text-amber-950 font-semibold tracking-tight">
+                    <span className="hidden sm:inline">Today&apos;s Rates</span>
+                    <span className="sm:hidden text-[11px]">Rates</span>
+                  </span>
+                </button>
+
+                {/* Pop-up Card */}
+                <TodayRatesModal
+                  isOpen={ratesModalOpen}
+                  onClose={() => setRatesModalOpen(false)}
+                  rates={rates}
+                />
+              </div>
+
               {/* Cart */}
               <Link
                 href="/cart"
@@ -279,10 +357,53 @@ export default function Navbar() {
               </div>
               <button
                 onClick={() => setMobileOpen(false)}
-                className="p-1 text-skj-charcoal"
+                className="p-1 text-skj-charcoal cursor-pointer"
                 aria-label="Close menu"
               >
                 <X size={22} />
+              </button>
+            </div>
+
+            {/* Quick Rates Card in Mobile Drawer */}
+            <div className="mx-4 mt-3 mb-1 p-3 bg-gradient-to-br from-amber-50/90 via-white to-amber-50/40 rounded-2xl border border-amber-200/80 shadow-xs">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                  <span className="text-[11px] font-bold text-amber-950 uppercase tracking-wide">
+                    Today&apos;s Live Rates
+                  </span>
+                </div>
+                <span className="text-[10px] text-stone-500 font-medium">Per 1g</span>
+              </div>
+              <div className="grid grid-cols-3 gap-1.5 text-center py-0.5">
+                <div className="p-1.5 bg-white rounded-xl border border-amber-100">
+                  <span className="text-[9px] text-stone-500 font-semibold block leading-tight">22K Gold</span>
+                  <span className="text-[11px] font-extrabold text-[#242A0B]">
+                    ₹{Number(rates?.gold22k || 0).toLocaleString('en-IN')}
+                  </span>
+                </div>
+                <div className="p-1.5 bg-white rounded-xl border border-amber-100">
+                  <span className="text-[9px] text-stone-500 font-semibold block leading-tight">24K Gold</span>
+                  <span className="text-[11px] font-extrabold text-[#242A0B]">
+                    ₹{Number(rates?.gold24k || 0).toLocaleString('en-IN')}
+                  </span>
+                </div>
+                <div className="p-1.5 bg-white rounded-xl border border-slate-200">
+                  <span className="text-[9px] text-slate-500 font-semibold block leading-tight">Silver (1g)</span>
+                  <span className="text-[11px] font-extrabold text-slate-900">
+                    ₹{Number(rates?.silver925 || 0).toLocaleString('en-IN')}
+                  </span>
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  setMobileOpen(false);
+                  setRatesModalOpen(true);
+                }}
+                className="w-full mt-2 py-1.5 bg-[#3B4210] hover:bg-[#242A0B] text-white text-[11px] font-semibold rounded-lg text-center transition-colors flex items-center justify-center gap-1 cursor-pointer"
+              >
+                <Coins size={12} />
+                <span>View Full Rates</span>
               </button>
             </div>
 
