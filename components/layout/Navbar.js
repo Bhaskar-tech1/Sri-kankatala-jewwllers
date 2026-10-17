@@ -205,7 +205,7 @@ export default function Navbar() {
             </Link>
 
             {/* Desktop navigation links */}
-            <ul className="hidden lg:flex items-center gap-1">
+            <ul className="hidden lg:flex flex-1 items-center justify-center gap-1">
               {navLinks.map((link) =>
                 link.children ? (
                   <li key={link.label} className="relative">
@@ -267,7 +267,7 @@ export default function Navbar() {
             </ul>
 
             {/* Right actions: Today's Rates, Cart, Mobile menu */}
-            <div className="flex items-center gap-1.5 sm:gap-2 lg:gap-3 flex-shrink-0 ml-auto">
+            <div className="flex items-center gap-1.5 sm:gap-2 lg:gap-3 flex-shrink-0">
               {/* Today's Rates Button & Pop-up */}
               <div className="relative">
                 <button
