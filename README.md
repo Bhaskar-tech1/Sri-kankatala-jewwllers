@@ -49,6 +49,6 @@ npm run start
 
 ## 📍 Store Location
 **Sri Kankatala Jewellers**  
-Opp. RTC Bus Stand, Main Road,  
-Ravulapalem, Andhra Pradesh - 533238  
-Phone: +91 94901 02747
+Maruthi nagar, near pedda anjaneyaswamy temple,  
+Ravulapalem, Andhra Pradesh 533238, India  
+Phone: +91 95056 08181

@@ -102,7 +102,9 @@ const storeSchema = {
   paymentAccepted: 'Cash, Credit Card, Debit Card, UPI, Net Banking',
   address: {
     '@type': 'PostalAddress',
-    streetAddress: `${siteConfig.address.line1}, ${siteConfig.address.line2}`,
+    streetAddress: siteConfig.address.line2
+      ? `${siteConfig.address.line1}, ${siteConfig.address.line2}`
+      : siteConfig.address.line1,
     addressLocality: siteConfig.address.city,
     addressRegion: siteConfig.address.state,
     postalCode: siteConfig.address.pincode,

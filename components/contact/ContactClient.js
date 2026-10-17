@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { MapPin, Phone, Mail, Clock, Send, CheckCircle2 } from 'lucide-react';
+import siteConfig from '@/lib/config';
 
 export default function ContactClient() {
   const [formData, setFormData] = useState({
@@ -67,9 +68,8 @@ export default function ContactClient() {
                     <div>
                       <h3 className="text-xs font-bold text-skj-charcoal mb-1.5 tracking-widest uppercase" style={{ fontFamily: 'Inter, system-ui, sans-serif' }}>Visit Our Store</h3>
                       <p className="text-sm text-skj-charcoal/80 leading-relaxed">
-                        Shop No. 20, MGM Complex, Market Road,<br />
-                        Maruthi Nagar, Ravulapalem,<br />
-                        Andhra Pradesh – 533238
+                        {siteConfig.address.line1},<br />
+                        {siteConfig.address.city}, {siteConfig.address.state} {siteConfig.address.pincode}, {siteConfig.address.country}
                       </p>
                     </div>
                   </div>
@@ -107,7 +107,7 @@ export default function ContactClient() {
                   <button onClick={() => window.open('https://wa.me/919505608181', '_blank')} className="group flex-1 bg-white hover:bg-skj-deep-olive text-skj-charcoal hover:text-white font-semibold text-xs uppercase tracking-wider py-4 px-4 rounded-xl text-center transition-all duration-300 shadow-lg shadow-black/5 flex items-center justify-center gap-2">
                     WhatsApp Us <Send size={14} />
                   </button>
-                  <a href="https://www.google.com/maps/search/?api=1&query=Sri+Kankatala+Jewellers+Maruthi+Nagar+Ravulapalem+Andhra+Pradesh+533238" target="_blank" rel="noopener noreferrer" className="flex-1 bg-transparent hover:bg-white/40 border border-white/60 text-skj-charcoal font-semibold text-xs uppercase tracking-wider py-4 px-4 rounded-xl text-center transition-all duration-300 backdrop-blur-sm">
+                  <a href="https://www.google.com/maps/search/?api=1&query=Sri+Kankatala+Jewellers+Maruthi+nagar+near+pedda+anjaneyaswamy+temple+Ravulapalem+Andhra+Pradesh+533238" target="_blank" rel="noopener noreferrer" className="flex-1 bg-transparent hover:bg-white/40 border border-white/60 text-skj-charcoal font-semibold text-xs uppercase tracking-wider py-4 px-4 rounded-xl text-center transition-all duration-300 backdrop-blur-sm">
                     Directions
                   </a>
                 </div>

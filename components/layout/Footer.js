@@ -123,8 +123,8 @@ export default function Footer() {
               Contact
             </h3>
             <address className="not-italic text-sm text-white/70 space-y-1.5">
-              <p>{siteConfig.address.line1}</p>
-              <p>{siteConfig.address.city}, {siteConfig.address.state}</p>
+              <p>{siteConfig.address.line1},</p>
+              <p>{siteConfig.address.city}, {siteConfig.address.state} {siteConfig.address.pincode}, {siteConfig.address.country}</p>
               <p>
                 <a
                   href={`tel:${siteConfig.phone}`}
